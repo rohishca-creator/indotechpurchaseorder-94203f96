@@ -19,20 +19,11 @@ export const generatePDF = (
   doc.setFillColor(...tealDark);
   doc.rect(0, 0, pageWidth, 45, "F");
 
-  // Company name
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
-  doc.setFont("helvetica", "bold");
-  doc.text("INDOTECH METALS PVT LTD", 14, 22);
-
   // Company tagline
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "normal");
-  doc.text("Premium Copper Wire Rod Manufacturers", 14, 30);
-
-  // Company address
-  doc.setFontSize(9);
-  doc.text("Mandi Gobindgarh, Punjab, India", 14, 38);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Copper Wire Rod Quotation", 14, 25);
 
   // Quotation title with copper accent
   doc.setFillColor(...copper);
@@ -132,7 +123,6 @@ export const generatePDF = (
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.text("Thank you for your business!", pageWidth / 2, footerY + 8, { align: "center" });
-  doc.text("Indotech Metals Pvt Ltd | Mandi Gobindgarh, Punjab", pageWidth / 2, footerY + 14, { align: "center" });
 
   // Signature area
   doc.setTextColor(...black);
