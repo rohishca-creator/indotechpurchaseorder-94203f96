@@ -81,8 +81,6 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
 • Coils: ${formData.numberOfCoils}
 • Rate: ${formatCurrency(formData.rate)}/kg
 
-💰 *Total Amount: ${formatCurrency(calculations.totalAmount)}*
-
 📋 Payment Terms: ${formData.paymentTerms}
 🚚 Station: ${formData.station || "TBD"}
 
