@@ -113,6 +113,11 @@ export const generatePDF = (
   doc.setFont("helvetica", "normal");
   doc.text(data.station || "—", 55, termsY + 10);
 
+  doc.setFont("helvetica", "bold");
+  doc.text("Delivery Date:", 14, termsY + 20);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.deliveryDate ? formatDate(data.deliveryDate) : "—", 55, termsY + 20);
+
   // Footer
   const footerY = 270;
   doc.setDrawColor(...tealDark);
