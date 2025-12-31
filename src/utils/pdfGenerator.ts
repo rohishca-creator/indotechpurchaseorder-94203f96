@@ -91,7 +91,6 @@ export const generatePDF = (
   doc.text("QTY (KG)", 90, tableY + 7);
   doc.text("COILS", 120, tableY + 7);
   doc.text("RATE (₹/KG)", 145, tableY + 7);
-  doc.text("AMOUNT", pageWidth - 30, tableY + 7);
 
   // Table row
   const rowY = tableY + 10;
@@ -107,26 +106,12 @@ export const generatePDF = (
   doc.text(data.quantity.toLocaleString("en-IN"), 90, rowY + 8);
   doc.text(data.numberOfCoils.toString(), 120, rowY + 8);
   doc.text(formatCurrency(data.rate).replace("₹", ""), 145, rowY + 8);
-  doc.text(formatCurrency(calculations.totalAmount).replace("₹", ""), pageWidth - 30, rowY + 8);
-
-  // Total section
-  const totalsY = rowY + 30;
-  const totalsX = pageWidth - 80;
-  
-  // Grand Total
-  doc.setFillColor(...copper);
-  doc.rect(totalsX - 5, totalsY, pageWidth - totalsX + 5 - 14, 14, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("TOTAL:", totalsX, totalsY + 10);
-  doc.text(formatCurrency(calculations.totalAmount), pageWidth - 20, totalsY + 10, { align: "right" });
 
   // Payment terms & Station
-  const termsY = totalsY + 35;
+  const termsY = rowY + 35;
   doc.setTextColor(...black);
   doc.setFontSize(10);
-  
+
   doc.setFont("helvetica", "bold");
   doc.text("Payment Terms:", 14, termsY);
   doc.setFont("helvetica", "normal");
