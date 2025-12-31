@@ -68,8 +68,7 @@ const InvoiceForm = () => {
     if (!validateForm()) return;
     
     // Create message text
-    const message = `*INDOTECH METALS PVT LTD*
-_Copper Wire Rod Quotation_
+    const message = `*Copper Wire Rod Quotation*
 
 📅 Date: ${formatDate(formData.invoiceDate)}
 
@@ -82,11 +81,7 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
 • Rate: ${formatCurrency(formData.rate)}/kg
 
 📋 Payment Terms: ${formData.paymentTerms}
-🚚 Station: ${formData.station || "TBD"}
-
----
-_Indotech Metals Pvt Ltd_
-_Mandi Gobindgarh, Punjab_`;
+🚚 Station: ${formData.station || "TBD"}`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
