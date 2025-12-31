@@ -1,15 +1,8 @@
 import { InvoiceData, CalculatedValues } from "@/types/invoice";
 
 export const calculateInvoice = (data: InvoiceData): CalculatedValues => {
-  const subtotal = data.quantity * data.rate;
-  const gstAmount = (subtotal * data.gstPercentage) / 100;
-  const totalAmount = subtotal + gstAmount;
-
-  return {
-    subtotal,
-    gstAmount,
-    totalAmount,
-  };
+  const totalAmount = data.quantity * data.rate;
+  return { totalAmount };
 };
 
 export const formatCurrency = (amount: number): string => {
@@ -27,12 +20,4 @@ export const formatDate = (date: Date): string => {
     month: "short",
     year: "numeric",
   }).format(date);
-};
-
-export const generateInvoiceNumber = (): string => {
-  const now = new Date();
-  const year = now.getFullYear().toString().slice(-2);
-  const month = (now.getMonth() + 1).toString().padStart(2, "0");
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
-  return `IM-${year}${month}-${random}`;
 };

@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { Calendar, FileText, Download, Printer, Building2, User, Phone, Mail, MapPin, Package, Coins, Hash, Percent, CreditCard } from "lucide-react";
+import { useState } from "react";
+import { Calendar, FileText, Download, Printer, Building2, User, Phone, Mail, MapPin, Package, Coins, CreditCard, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InvoiceData } from "@/types/invoice";
-import { generateInvoiceNumber, calculateInvoice, formatCurrency, formatDate } from "@/utils/invoiceCalculations";
-import { generatePDF } from "@/utils/pdfGenerator";
+import { calculateInvoice, formatCurrency, formatDate } from "@/utils/invoiceCalculations";
+import { downloadPDF } from "@/utils/pdfGenerator";
 import { toast } from "@/hooks/use-toast";
 
 const paymentTermsOptions = [
@@ -17,7 +17,6 @@ const paymentTermsOptions = [
 
 const InvoiceForm = () => {
   const [formData, setFormData] = useState<InvoiceData>({
-    invoiceNumber: generateInvoiceNumber(),
     invoiceDate: new Date(),
     partyName: "",
     partyAddress: "",
@@ -26,8 +25,6 @@ const InvoiceForm = () => {
     quantity: 0,
     numberOfCoils: 0,
     rate: 0,
-    hsnCode: "7408",
-    gstPercentage: 18,
     paymentTerms: "Net 30 Days",
     station: "",
   });
@@ -38,14 +35,14 @@ const InvoiceForm = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleDownloadPDF = () => {
+  const validateForm = (): boolean => {
     if (!formData.partyName.trim()) {
       toast({
         title: "Missing Information",
         description: "Please enter the party/customer name",
         variant: "destructive",
       });
-      return;
+      return false;
     }
     if (formData.quantity <= 0 || formData.rate <= 0) {
       toast({
@@ -53,12 +50,54 @@ const InvoiceForm = () => {
         description: "Please enter valid quantity and rate",
         variant: "destructive",
       });
-      return;
+      return false;
     }
-    generatePDF(formData, calculations);
+    return true;
+  };
+
+  const handleDownloadPDF = () => {
+    if (!validateForm()) return;
+    downloadPDF(formData, calculations);
     toast({
       title: "PDF Generated!",
-      description: `Invoice downloaded as PDF successfully`,
+      description: "Quotation downloaded successfully",
+    });
+  };
+
+  const handleWhatsAppShare = () => {
+    if (!validateForm()) return;
+    
+    // Create message text
+    const message = `*INDOTECH METALS PVT LTD*
+_Copper Wire Rod Quotation_
+
+📅 Date: ${formatDate(formData.invoiceDate)}
+
+👤 *Party:* ${formData.partyName}
+${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
+
+📦 *Order Details:*
+• Quantity: ${formData.quantity.toLocaleString("en-IN")} kg
+• Coils: ${formData.numberOfCoils}
+• Rate: ${formatCurrency(formData.rate)}/kg
+
+💰 *Total Amount: ${formatCurrency(calculations.totalAmount)}*
+
+📋 Payment Terms: ${formData.paymentTerms}
+🚚 Station: ${formData.station || "TBD"}
+
+---
+_Indotech Metals Pvt Ltd_
+_Mandi Gobindgarh, Punjab_`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, "_blank");
+    
+    toast({
+      title: "Opening WhatsApp",
+      description: "Share the quotation with your contacts",
     });
   };
 
@@ -66,10 +105,9 @@ const InvoiceForm = () => {
     window.print();
   };
 
-  const handleNewInvoice = () => {
+  const handleNewQuotation = () => {
     setFormData({
       ...formData,
-      invoiceNumber: generateInvoiceNumber(),
       invoiceDate: new Date(),
       partyName: "",
       partyAddress: "",
@@ -81,8 +119,8 @@ const InvoiceForm = () => {
       station: "",
     });
     toast({
-      title: "New Invoice",
-      description: "Form cleared for new invoice",
+      title: "New Quotation",
+      description: "Form cleared for new quotation",
     });
   };
 
@@ -108,31 +146,23 @@ const InvoiceForm = () => {
       </header>
 
       <main className="container max-w-4xl mx-auto px-4 py-6">
-        {/* Invoice Details Bar */}
+        {/* Date & New Button */}
         <div className="bg-card rounded-xl shadow-card p-4 mb-6 animate-fade-in">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div>
-                <span className="label-text flex items-center gap-1">
-                  <Hash className="w-3.5 h-3.5" /> Invoice No
-                </span>
-                <p className="font-mono font-semibold text-foreground">{formData.invoiceNumber}</p>
-              </div>
-              <div>
-                <span className="label-text flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5" /> Date
-                </span>
-                <input
-                  type="date"
-                  value={formData.invoiceDate.toISOString().split("T")[0]}
-                  onChange={(e) => handleInputChange("invoiceDate", new Date(e.target.value))}
-                  className="font-medium text-foreground bg-transparent border-none p-0 focus:outline-none cursor-pointer"
-                />
-              </div>
+            <div>
+              <span className="label-text flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" /> Date
+              </span>
+              <input
+                type="date"
+                value={formData.invoiceDate.toISOString().split("T")[0]}
+                onChange={(e) => handleInputChange("invoiceDate", new Date(e.target.value))}
+                className="font-medium text-foreground bg-transparent border-none p-0 focus:outline-none cursor-pointer"
+              />
             </div>
-            <Button variant="ghost" size="sm" onClick={handleNewInvoice}>
+            <Button variant="ghost" size="sm" onClick={handleNewQuotation}>
               <FileText className="w-4 h-4 mr-1" />
-              New Invoice
+              New Quotation
             </Button>
           </div>
         </div>
@@ -230,48 +260,19 @@ const InvoiceForm = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label-text flex items-center gap-1">
-                    <Coins className="w-3.5 h-3.5" /> Rate (₹/kg) *
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    value={formData.rate || ""}
-                    onChange={(e) => handleInputChange("rate", parseFloat(e.target.value) || 0)}
-                    className="input-field font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="label-text">HSN Code</label>
-                  <input
-                    type="text"
-                    placeholder="7408"
-                    value={formData.hsnCode}
-                    onChange={(e) => handleInputChange("hsnCode", e.target.value)}
-                    className="input-field font-mono"
-                  />
-                </div>
-              </div>
-
               <div>
                 <label className="label-text flex items-center gap-1">
-                  <Percent className="w-3.5 h-3.5" /> GST Percentage
+                  <Coins className="w-3.5 h-3.5" /> Rate (₹/kg) *
                 </label>
-                <select
-                  value={formData.gstPercentage}
-                  onChange={(e) => handleInputChange("gstPercentage", parseInt(e.target.value))}
-                  className="input-field cursor-pointer"
-                >
-                  <option value={0}>0% (Exempt)</option>
-                  <option value={5}>5%</option>
-                  <option value={12}>12%</option>
-                  <option value={18}>18%</option>
-                  <option value={28}>28%</option>
-                </select>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  value={formData.rate || ""}
+                  onChange={(e) => handleInputChange("rate", parseFloat(e.target.value) || 0)}
+                  className="input-field font-mono"
+                />
               </div>
             </div>
           </div>
@@ -314,22 +315,22 @@ const InvoiceForm = () => {
             </div>
           </div>
 
-          {/* Calculation Summary */}
+          {/* Total Summary */}
           <div className="bg-card rounded-xl shadow-card p-5 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-            <h2 className="text-lg font-semibold text-foreground mb-4">Invoice Summary</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Quotation Summary</h2>
 
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-muted-foreground">Subtotal</span>
+                <span className="text-muted-foreground">Quantity</span>
                 <span className="font-mono font-medium text-foreground">
-                  {formatCurrency(calculations.subtotal)}
+                  {formData.quantity.toLocaleString("en-IN")} kg
                 </span>
               </div>
               
               <div className="flex justify-between items-center py-2 border-b border-border">
-                <span className="text-muted-foreground">GST ({formData.gstPercentage}%)</span>
+                <span className="text-muted-foreground">Rate</span>
                 <span className="font-mono font-medium text-foreground">
-                  {formatCurrency(calculations.gstAmount)}
+                  {formatCurrency(formData.rate)}/kg
                 </span>
               </div>
 
@@ -349,6 +350,15 @@ const InvoiceForm = () => {
             variant="copper"
             size="lg"
             className="flex-1"
+            onClick={handleWhatsAppShare}
+          >
+            <Share2 className="w-5 h-5" />
+            Share on WhatsApp
+          </Button>
+          <Button
+            variant="default"
+            size="lg"
+            className="flex-1"
             onClick={handleDownloadPDF}
           >
             <Download className="w-5 h-5" />
@@ -357,11 +367,11 @@ const InvoiceForm = () => {
           <Button
             variant="outline"
             size="lg"
-            className="flex-1"
+            className="flex-1 sm:flex-none"
             onClick={handlePrint}
           >
             <Printer className="w-5 h-5" />
-            Print Invoice
+            Print
           </Button>
         </div>
 
