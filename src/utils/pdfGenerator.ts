@@ -118,6 +118,15 @@ export const generatePDF = (
   doc.setFont("helvetica", "normal");
   doc.text(data.deliveryDate ? formatDate(data.deliveryDate) : "—", 55, termsY + 20);
 
+  // Notes section
+  if (data.notes) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Notes:", 14, termsY + 35);
+    doc.setFont("helvetica", "normal");
+    const splitNotes = doc.splitTextToSize(data.notes, pageWidth - 28);
+    doc.text(splitNotes, 14, termsY + 43);
+  }
+
   // Footer
   const footerY = 270;
   doc.setDrawColor(...tealDark);

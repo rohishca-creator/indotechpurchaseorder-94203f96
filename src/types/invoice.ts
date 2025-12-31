@@ -10,6 +10,7 @@ export interface InvoiceData {
   rate: number;
   paymentTerms: string;
   station: string;
+  notes: string;
 }
 
 export interface CalculatedValues {
