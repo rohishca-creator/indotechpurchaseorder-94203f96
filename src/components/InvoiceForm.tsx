@@ -18,6 +18,7 @@ const paymentTermsOptions = [
 const InvoiceForm = () => {
   const [formData, setFormData] = useState<InvoiceData>({
     invoiceDate: new Date(),
+    deliveryDate: null,
     partyName: "",
     partyAddress: "",
     partyPhone: "",
@@ -71,6 +72,7 @@ const InvoiceForm = () => {
     const message = `*Copper Wire Rod Quotation*
 
 📅 Date: ${formatDate(formData.invoiceDate)}
+${formData.deliveryDate ? `📦 Delivery Date: ${formatDate(formData.deliveryDate)}` : ""}
 
 👤 *Party:* ${formData.partyName}
 ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
@@ -102,6 +104,7 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
     setFormData({
       ...formData,
       invoiceDate: new Date(),
+      deliveryDate: null,
       partyName: "",
       partyAddress: "",
       partyPhone: "",
@@ -303,6 +306,18 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
                   value={formData.station}
                   onChange={(e) => handleInputChange("station", e.target.value)}
                   className="input-field"
+                />
+              </div>
+
+              <div>
+                <label className="label-text flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5" /> Delivery Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.deliveryDate ? formData.deliveryDate.toISOString().split("T")[0] : ""}
+                  onChange={(e) => handleInputChange("deliveryDate", e.target.value ? new Date(e.target.value) : null)}
+                  className="input-field cursor-pointer"
                 />
               </div>
             </div>

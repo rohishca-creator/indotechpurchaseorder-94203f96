@@ -1,5 +1,6 @@
 export interface InvoiceData {
   invoiceDate: Date;
+  deliveryDate: Date | null;
   partyName: string;
   partyAddress: string;
   partyPhone: string;
