@@ -28,6 +28,7 @@ const InvoiceForm = () => {
     rate: 0,
     paymentTerms: "Net 30 Days",
     station: "",
+    notes: "",
   });
 
   const calculations = calculateInvoice(formData);
@@ -83,7 +84,9 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
 • Rate: ${formatCurrency(formData.rate)}/kg
 
 📋 Payment Terms: ${formData.paymentTerms}
-🚚 Station: ${formData.station || "TBD"}`;
+🚚 Station: ${formData.station || "TBD"}${formData.notes ? `
+
+📝 Notes: ${formData.notes}` : ""}`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
@@ -113,6 +116,7 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
       numberOfCoils: 0,
       rate: 0,
       station: "",
+      notes: "",
     });
     toast({
       title: "New Quotation",
@@ -318,6 +322,18 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
                   value={formData.deliveryDate ? formData.deliveryDate.toISOString().split("T")[0] : ""}
                   onChange={(e) => handleInputChange("deliveryDate", e.target.value ? new Date(e.target.value) : null)}
                   className="input-field cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <label className="label-text flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5" /> Notes
+                </label>
+                <textarea
+                  placeholder="Add any additional notes or remarks"
+                  value={formData.notes}
+                  onChange={(e) => handleInputChange("notes", e.target.value)}
+                  className="input-field min-h-[60px] resize-none"
                 />
               </div>
             </div>
