@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, FileText, Download, Printer, Building2, User, Phone, Mail, MapPin, Package, Coins, CreditCard, Share2 } from "lucide-react";
+import { Calendar, FileText, Download, Printer, Building2, User, Phone, Mail, MapPin, Package, Coins, CreditCard, Share2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InvoiceData } from "@/types/invoice";
 import { calculateInvoice, formatCurrency, formatDate } from "@/utils/invoiceCalculations";
@@ -372,6 +372,15 @@ _Mandi Gobindgarh, Punjab_`;
           >
             <Printer className="w-5 h-5" />
             Print
+          </Button>
+          <Button
+            variant="destructive"
+            size="lg"
+            className="flex-1 sm:flex-none"
+            onClick={handleNewQuotation}
+          >
+            <RotateCcw className="w-5 h-5" />
+            Reset
           </Button>
         </div>
 
