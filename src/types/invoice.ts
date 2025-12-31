@@ -1,5 +1,4 @@
 export interface InvoiceData {
-  invoiceNumber: string;
   invoiceDate: Date;
   partyName: string;
   partyAddress: string;
@@ -8,14 +7,10 @@ export interface InvoiceData {
   quantity: number;
   numberOfCoils: number;
   rate: number;
-  hsnCode: string;
-  gstPercentage: number;
   paymentTerms: string;
   station: string;
 }
 
 export interface CalculatedValues {
-  subtotal: number;
-  gstAmount: number;
   totalAmount: number;
 }
