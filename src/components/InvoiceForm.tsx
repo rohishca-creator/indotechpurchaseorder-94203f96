@@ -327,17 +327,10 @@ _Mandi Gobindgarh, Punjab_`;
                 </span>
               </div>
               
-              <div className="flex justify-between items-center py-2 border-b border-border">
+              <div className="flex justify-between items-center py-2">
                 <span className="text-muted-foreground">Rate</span>
                 <span className="font-mono font-medium text-foreground">
                   {formatCurrency(formData.rate)}/kg
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center py-3 bg-gradient-to-r from-teal-dark to-teal rounded-lg px-4 -mx-1">
-                <span className="text-primary-foreground font-semibold">Total Amount</span>
-                <span className="font-mono font-bold text-xl text-primary-foreground">
-                  {formatCurrency(calculations.totalAmount)}
                 </span>
               </div>
             </div>
