@@ -23,6 +23,7 @@ const InvoiceForm = () => {
     partyAddress: "",
     partyPhone: "",
     partyEmail: "",
+    brokerName: "",
     quantity: 0,
     numberOfCoils: 0,
     rate: 0,
@@ -76,7 +77,8 @@ const InvoiceForm = () => {
 ${formData.deliveryDate ? `📦 Delivery Date: ${formatDate(formData.deliveryDate)}` : ""}
 
 👤 *Party:* ${formData.partyName}
-${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
+${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.brokerName ? `
+🤝 Broker: ${formData.brokerName}` : ""}
 
 📦 *Order Details:*
 • Quantity: ${formData.quantity.toLocaleString("en-IN")} kg
@@ -112,6 +114,7 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
       partyAddress: "",
       partyPhone: "",
       partyEmail: "",
+      brokerName: "",
       quantity: 0,
       numberOfCoils: 0,
       rate: 0,
@@ -223,6 +226,17 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}
                     className="input-field"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="label-text">Broker Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter broker name (if any)"
+                  value={formData.brokerName}
+                  onChange={(e) => handleInputChange("brokerName", e.target.value)}
+                  className="input-field"
+                />
               </div>
             </div>
           </div>
