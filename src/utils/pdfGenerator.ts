@@ -67,6 +67,11 @@ export const generatePDF = (
   if (data.partyAddress) doc.text(data.partyAddress, 18, billToY + 19);
   if (data.partyPhone) doc.text(`Phone: ${data.partyPhone}`, 18, billToY + 25);
   if (data.partyEmail) doc.text(`Email: ${data.partyEmail}`, pageWidth / 2, billToY + 25);
+  if (data.brokerName) {
+    doc.setTextColor(...copper);
+    doc.text(`Broker: ${data.brokerName}`, 18, billToY + 31);
+    doc.setTextColor(...gray);
+  }
 
   // Items table
   const tableY = billToY + 45;
