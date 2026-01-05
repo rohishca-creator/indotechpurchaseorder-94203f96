@@ -227,17 +227,6 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
                   />
                 </div>
               </div>
-
-              <div>
-                <label className="label-text">Broker Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter broker name (if any)"
-                  value={formData.brokerName}
-                  onChange={(e) => handleInputChange("brokerName", e.target.value)}
-                  className="input-field"
-                />
-              </div>
             </div>
           </div>
 
@@ -336,6 +325,19 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
                   value={formData.deliveryDate ? formData.deliveryDate.toISOString().split("T")[0] : ""}
                   onChange={(e) => handleInputChange("deliveryDate", e.target.value ? new Date(e.target.value) : null)}
                   className="input-field cursor-pointer"
+                />
+              </div>
+
+              <div>
+                <label className="label-text flex items-center gap-1">
+                  <User className="w-3.5 h-3.5" /> Broker Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter broker name (if any)"
+                  value={formData.brokerName}
+                  onChange={(e) => handleInputChange("brokerName", e.target.value)}
+                  className="input-field"
                 />
               </div>
 
