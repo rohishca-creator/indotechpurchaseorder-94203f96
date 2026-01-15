@@ -2,37 +2,34 @@ import jsPDF from "jspdf";
 import { InvoiceData, CalculatedValues } from "@/types/invoice";
 import { formatCurrency, formatDate } from "./invoiceCalculations";
 
-// Fetch image as binary and convert to base64 WITHOUT canvas re-encoding
-const fetchImageAsBase64 = async (imagePath: string): Promise<string | null> => {
-  try {
-    const response = await fetch(imagePath);
-    if (!response.ok) return null;
-    const blob = await response.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return null;
-  }
-};
-
-// Simple base64 helper for signature (uses canvas for webp compatibility)
-const getImageBase64 = async (imagePath: string): Promise<string> => {
+// Compress and resize image for smaller PDF output
+const compressImage = async (
+  imagePath: string, 
+  maxWidth: number, 
+  quality: number = 0.8
+): Promise<string | null> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
+      // Calculate new dimensions maintaining aspect ratio
+      let width = img.width;
+      let height = img.height;
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      
       const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext("2d");
-      ctx?.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
+      ctx?.drawImage(img, 0, 0, width, height);
+      
+      // Export as compressed JPEG
+      resolve(canvas.toDataURL("image/jpeg", quality));
     };
-    img.onerror = () => resolve("");
+    img.onerror = () => resolve(null);
     img.src = imagePath;
   });
 };
@@ -41,7 +38,8 @@ export const generatePDF = async (
   data: InvoiceData,
   calculations: CalculatedValues
 ): Promise<jsPDF> => {
-  const doc = new jsPDF();
+  // Enable compression for smaller file size
+  const doc = new jsPDF({ compress: true });
   const pageWidth = doc.internal.pageSize.getWidth();
   
   // Brand Colors - Indotech Metals (only these + black/white)
@@ -53,7 +51,8 @@ export const generatePDF = async (
   // Logo centered at top - using binary fetch for original quality
   let logoBottomY = 36; // Default if logo fails to load
   try {
-    const logoBase64 = await fetchImageAsBase64("/images/logo-hq.png");
+    // Compress logo to ~250px width at 80% quality for smaller PDF
+    const logoBase64 = await compressImage("/images/logo-hq.png", 250, 0.8);
     if (logoBase64) {
       // Get image properties from jsPDF for accurate dimensions
       const props = doc.getImageProperties(logoBase64);
@@ -62,7 +61,7 @@ export const generatePDF = async (
       const logoHeight = logoWidth * (props.height / props.width); // Maintain true aspect ratio
       const logoX = (pageWidth - logoWidth) / 2;
       const logoY = 15; // 15mm top margin
-      doc.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
+      doc.addImage(logoBase64, "JPEG", logoX, logoY, logoWidth, logoHeight);
       logoBottomY = logoY + logoHeight; // Track where logo ends
     }
   } catch (e) {
@@ -220,9 +219,10 @@ export const generatePDF = async (
 
   // Digital Signature area - Dinesh Mehta, Managing Director
   try {
-    const signatureBase64 = await getImageBase64("/images/signature.webp");
+    // Compress signature to ~150px width at 75% quality
+    const signatureBase64 = await compressImage("/images/signature.webp", 150, 0.75);
     if (signatureBase64) {
-      doc.addImage(signatureBase64, "WEBP", pageWidth - 65, footerY - 45, 50, 30);
+      doc.addImage(signatureBase64, "JPEG", pageWidth - 65, footerY - 45, 50, 30);
     }
   } catch (e) {
     console.log("Signature could not be loaded");
