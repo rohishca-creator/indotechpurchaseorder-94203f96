@@ -32,15 +32,15 @@ export const generatePDF = async (
   const brandBrown = [74, 44, 26] as const;     // #4A2C1A - dark brown
   const black = [30, 30, 30] as const;          // near black for body text
 
-  // Pure white background - logo centered at top with no background effects
+  // Pure white background (no colored header bar)
+  // Logo centered at top with transparent background
   try {
-    const logoBase64 = await getImageBase64("/images/indotech-logo.png");
+    const logoBase64 = await getImageBase64("/images/logo-white.png");
     if (logoBase64) {
-      // Logo width at ~50% of page width for professional appearance
-      const logoWidth = pageWidth * 0.50;
-      const logoHeight = logoWidth * 0.35; // Maintain aspect ratio
+      // Center the logo horizontally
+      const logoWidth = 60;
       const logoX = (pageWidth - logoWidth) / 2;
-      doc.addImage(logoBase64, "PNG", logoX, 8, logoWidth, logoHeight, undefined, "FAST");
+      doc.addImage(logoBase64, "PNG", logoX, 8, logoWidth, 22);
     }
   } catch (e) {
     console.log("Logo could not be loaded");
