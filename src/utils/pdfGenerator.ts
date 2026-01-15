@@ -2,10 +2,28 @@ import jsPDF from "jspdf";
 import { InvoiceData, CalculatedValues } from "@/types/invoice";
 import { formatCurrency, formatDate } from "./invoiceCalculations";
 
-export const generatePDF = (
+// Convert image to base64 for PDF embedding
+const getLogoBase64 = async (): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx?.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve("");
+    img.src = "/images/logo.png";
+  });
+};
+
+export const generatePDF = async (
   data: InvoiceData,
   calculations: CalculatedValues
-): jsPDF => {
+): Promise<jsPDF> => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   
@@ -17,13 +35,17 @@ export const generatePDF = (
 
   // Header background
   doc.setFillColor(...tealDark);
-  doc.rect(0, 0, pageWidth, 45, "F");
+  doc.rect(0, 0, pageWidth, 55, "F");
 
-  // Company tagline
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text("Copper Wire Rod Quotation", 14, 25);
+  // Add logo
+  try {
+    const logoBase64 = await getLogoBase64();
+    if (logoBase64) {
+      doc.addImage(logoBase64, "PNG", 14, 8, 50, 18);
+    }
+  } catch (e) {
+    console.log("Logo could not be loaded");
+  }
 
   // Quotation title with copper accent
   doc.setFillColor(...copper);
@@ -33,8 +55,17 @@ export const generatePDF = (
   doc.setFont("helvetica", "bold");
   doc.text("QUOTATION", pageWidth - 42, 21, { align: "center" });
 
+  // Company address info
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text("Sector 17 A, Transport Nagar Road, Ambey Majra, Mandi Gobindgarh, Punjab - 147301", 14, 32);
+  doc.text("Phone: 98141-10981 | 99076-00034  |  Email: Dinesh@indotechmetals.com  |  www.indotechmetals.com", 14, 38);
+  doc.setFontSize(7);
+  doc.text("CIN: U24109PB2024PTC061421", 14, 44);
+
   // Date
-  const infoStartY = 55;
+  const infoStartY = 65;
   doc.setTextColor(...black);
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
@@ -152,13 +183,13 @@ export const generatePDF = (
   return doc;
 };
 
-export const downloadPDF = (data: InvoiceData, calculations: CalculatedValues): void => {
-  const doc = generatePDF(data, calculations);
+export const downloadPDF = async (data: InvoiceData, calculations: CalculatedValues): Promise<void> => {
+  const doc = await generatePDF(data, calculations);
   const fileName = `Quotation_${data.partyName.replace(/\s+/g, "_") || "Customer"}_${formatDate(data.invoiceDate).replace(/\s+/g, "_")}.pdf`;
   doc.save(fileName);
 };
 
-export const getPDFBlob = (data: InvoiceData, calculations: CalculatedValues): Blob => {
-  const doc = generatePDF(data, calculations);
+export const getPDFBlob = async (data: InvoiceData, calculations: CalculatedValues): Promise<Blob> => {
+  const doc = await generatePDF(data, calculations);
   return doc.output("blob");
 };
