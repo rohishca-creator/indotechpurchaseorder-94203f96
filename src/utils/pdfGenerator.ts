@@ -213,15 +213,17 @@ export const generatePDF = async (
   doc.setLineWidth(0.5);
   doc.line(14, footerY, pageWidth - 14, footerY);
 
+  // GST note - above thank you
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...brandCopper);
+  doc.setFontSize(9);
+  doc.text("GST 18% Extra", pageWidth / 2, footerY + 6, { align: "center" });
+
+  // Thank you message
   doc.setTextColor(...black);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Thank you for your business!", pageWidth / 2, footerY + 6, { align: "center" });
-
-  // GST note
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(...brandCopper);
-  doc.text("GST 18% Extra", pageWidth / 2, footerY + 12, { align: "center" });
+  doc.text("Thank you for your business!", pageWidth / 2, footerY + 12, { align: "center" });
 
   // Digital Signature area - Dinesh Mehta, Managing Director
   try {
@@ -245,9 +247,4 @@ export const downloadPDF = async (data: InvoiceData, calculations: CalculatedVal
   const doc = await generatePDF(data, calculations);
   const fileName = `Quotation_${data.partyName.replace(/\s+/g, "_") || "Customer"}_${formatDate(data.invoiceDate).replace(/\s+/g, "_")}.pdf`;
   doc.save(fileName);
-};
-
-export const getPDFBlob = async (data: InvoiceData, calculations: CalculatedValues): Promise<Blob> => {
-  const doc = await generatePDF(data, calculations);
-  return doc.output("blob");
 };
