@@ -37,25 +37,25 @@ export const generatePDF = async (
   doc.setFillColor(...tealDark);
   doc.rect(0, 0, pageWidth, 60, "F");
 
-  // Add logo on top left
+  // Add logo on left side
   try {
     const logoBase64 = await getLogoBase64();
     if (logoBase64) {
-      doc.addImage(logoBase64, "PNG", 14, 6, 45, 16);
+      doc.addImage(logoBase64, "PNG", 14, 8, 40, 14);
     }
   } catch (e) {
     console.log("Logo could not be loaded");
   }
 
-  // Company name and tagline
+  // Company name and tagline - positioned to the right of logo
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("INDOTECH METALS PRIVATE LIMITED", pageWidth / 2, 12, { align: "center" });
+  doc.text("INDOTECH METALS PRIVATE LIMITED", 60, 12);
   
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Manufacturers of Copper Wired Rod, Copper Strip & PVC Insulated Cables", pageWidth / 2, 18, { align: "center" });
+  doc.text("Manufacturers of Copper Wire Rod, Copper Strip & PVC Insulated Cables", 60, 18);
 
   // Company address
   doc.setFontSize(7);
@@ -72,13 +72,13 @@ export const generatePDF = async (
   doc.text("Email: Dinesh@indotechmetals.com", pageWidth - 14, 40, { align: "right" });
   doc.text("www.indotechmetals.com", pageWidth - 14, 45, { align: "right" });
 
-  // Quotation title with copper accent
+  // Order Confirmation title with copper accent
   doc.setFillColor(...copper);
-  doc.rect(pageWidth - 60, 52, 46, 8, "F");
+  doc.rect(pageWidth - 70, 52, 56, 8, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.text("QUOTATION", pageWidth - 37, 58, { align: "center" });
+  doc.text("ORDER CONFIRMATION", pageWidth - 42, 58, { align: "center" });
 
   // Date
   const infoStartY = 65;
