@@ -2,8 +2,8 @@ import jsPDF from "jspdf";
 import { InvoiceData, CalculatedValues } from "@/types/invoice";
 import { formatCurrency, formatDate } from "./invoiceCalculations";
 
-// Convert image to base64 for PDF embedding
-const getImageBase64 = async (imagePath: string): Promise<string> => {
+// Convert image to base64 for PDF embedding (returns base64 and original dimensions)
+const getImageBase64WithDimensions = async (imagePath: string): Promise<{ base64: string; width: number; height: number } | null> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -13,11 +13,21 @@ const getImageBase64 = async (imagePath: string): Promise<string> => {
       canvas.height = img.height;
       const ctx = canvas.getContext("2d");
       ctx?.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/jpeg"));
+      resolve({
+        base64: canvas.toDataURL("image/jpeg"),
+        width: img.width,
+        height: img.height
+      });
     };
-    img.onerror = () => resolve("");
+    img.onerror = () => resolve(null);
     img.src = imagePath;
   });
+};
+
+// Simple base64 helper for signature
+const getImageBase64 = async (imagePath: string): Promise<string> => {
+  const result = await getImageBase64WithDimensions(imagePath);
+  return result?.base64 || "";
 };
 
 export const generatePDF = async (
@@ -34,54 +44,58 @@ export const generatePDF = async (
 
 // Pure white background (no colored header bar)
   // Logo centered at top - compact size (25-28% of page width)
+  let logoBottomY = 36; // Default if logo fails to load
   try {
-    const logoBase64 = await getImageBase64("/images/logo.jpg");
-    if (logoBase64) {
-      // Logo width ~55mm (about 26% of A4 width), maintaining aspect ratio
+    const logoData = await getImageBase64WithDimensions("/images/logo.jpg");
+    if (logoData) {
+      // Logo width ~55mm (about 26% of A4 width), height calculated from actual aspect ratio
       const logoWidth = 55;
-      const logoHeight = 21; // Maintains original aspect ratio
+      const aspectRatio = logoData.height / logoData.width;
+      const logoHeight = logoWidth * aspectRatio; // Maintain true aspect ratio
       const logoX = (pageWidth - logoWidth) / 2;
       const logoY = 15; // 15mm top margin
-      doc.addImage(logoBase64, "JPEG", logoX, logoY, logoWidth, logoHeight);
+      doc.addImage(logoData.base64, "JPEG", logoX, logoY, logoWidth, logoHeight);
+      logoBottomY = logoY + logoHeight; // Track where logo ends
     }
   } catch (e) {
     console.log("Logo could not be loaded");
   }
 
-  // Company name - centered under logo (6mm gap from logo bottom = 15 + 21 + 6 = 42mm)
+  // Company name - centered under logo (6mm gap from logo bottom)
+  const companyNameY = logoBottomY + 6;
   doc.setTextColor(...brandBrown);
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("INDOTECH METALS PRIVATE LIMITED", pageWidth / 2, 42, { align: "center" });
+  doc.text("INDOTECH METALS PRIVATE LIMITED", pageWidth / 2, companyNameY, { align: "center" });
   
   // Tagline
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...black);
-  doc.text("Manufacturers of Copper Wire Rod, Copper Strip & PVC Insulated Cables", pageWidth / 2, 48, { align: "center" });
+  doc.text("Manufacturers of Copper Wire Rod, Copper Strip & PVC Insulated Cables", pageWidth / 2, companyNameY + 6, { align: "center" });
 
   // Company address - centered
   doc.setFontSize(8);
-  doc.text("Transport Nagar Road, Sector-17/A, Ambey Majra, Mandi Gobindgarh, Distt-Fatehgarh Sahib, Punjab (147301), India", pageWidth / 2, 54, { align: "center" });
+  doc.text("Transport Nagar Road, Sector-17/A, Ambey Majra, Mandi Gobindgarh, Distt-Fatehgarh Sahib, Punjab (147301), India", pageWidth / 2, companyNameY + 12, { align: "center" });
 
   // Registration & Contact details - centered
   doc.setFontSize(7);
-  doc.text("CIN: U24109PB2024PTC061421 | GSTIN: 03AAHCI6485M1Z3 | PAN & IEC: AAHCI6485M", pageWidth / 2, 60, { align: "center" });
-  doc.text("Phone: 98141-10981 | 99076-00034 | Email: Dinesh@indotechmetals.com | www.indotechmetals.com", pageWidth / 2, 65, { align: "center" });
+  doc.text("CIN: U24109PB2024PTC061421 | GSTIN: 03AAHCI6485M1Z3 | PAN & IEC: AAHCI6485M", pageWidth / 2, companyNameY + 18, { align: "center" });
+  doc.text("Phone: 98141-10981 | 99076-00034 | Email: Dinesh@indotechmetals.com | www.indotechmetals.com", pageWidth / 2, companyNameY + 23, { align: "center" });
 
   // Copper accent line under header
   doc.setDrawColor(...brandCopper);
   doc.setLineWidth(0.8);
-  doc.line(14, 70, pageWidth - 14, 70);
+  doc.line(14, companyNameY + 28, pageWidth - 14, companyNameY + 28);
 
   // Order Confirmation title - dark brown, no background
   doc.setTextColor(...brandBrown);
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("ORDER CONFIRMATION", pageWidth / 2, 80, { align: "center" });
+  doc.text("ORDER CONFIRMATION", pageWidth / 2, companyNameY + 38, { align: "center" });
 
   // Date
-  const infoStartY = 89;
+  const infoStartY = companyNameY + 47;
   doc.setTextColor(...black);
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
