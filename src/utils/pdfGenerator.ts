@@ -35,34 +35,50 @@ export const generatePDF = async (
 
   // Header background
   doc.setFillColor(...tealDark);
-  doc.rect(0, 0, pageWidth, 55, "F");
+  doc.rect(0, 0, pageWidth, 60, "F");
 
-  // Add logo
+  // Add logo on top left
   try {
     const logoBase64 = await getLogoBase64();
     if (logoBase64) {
-      doc.addImage(logoBase64, "PNG", 14, 8, 50, 18);
+      doc.addImage(logoBase64, "PNG", 14, 6, 45, 16);
     }
   } catch (e) {
     console.log("Logo could not be loaded");
   }
 
-  // Quotation title with copper accent
-  doc.setFillColor(...copper);
-  doc.rect(pageWidth - 70, 12, 56, 12, "F");
+  // Company name and tagline
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(14);
+  doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("QUOTATION", pageWidth - 42, 21, { align: "center" });
-
-  // Company address info
-  doc.setTextColor(255, 255, 255);
+  doc.text("INDOTECH METALS PRIVATE LIMITED", pageWidth / 2, 12, { align: "center" });
+  
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Sector 17 A, Transport Nagar Road, Ambey Majra, Mandi Gobindgarh, Punjab - 147301", 14, 32);
-  doc.text("Phone: 98141-10981 | 99076-00034  |  Email: Dinesh@indotechmetals.com  |  www.indotechmetals.com", 14, 38);
+  doc.text("Manufacturers of Copper Wired Rod, Copper Strip & PVC Insulated Cables", pageWidth / 2, 18, { align: "center" });
+
+  // Company address
   doc.setFontSize(7);
-  doc.text("CIN: U24109PB2024PTC061421", 14, 44);
+  doc.text("Transport Nagar Road, Sector-17/A, Ambey Majra, Mandi Gobindgarh, Distt-Fatehgarh Sahib, Punjab (147301), India", pageWidth / 2, 25, { align: "center" });
+
+  // Registration details - left side
+  doc.setFontSize(6);
+  doc.text("CIN: U24109PB2024PTC061421", 14, 35);
+  doc.text("GSTIN: 03AAHCI6485M1Z3", 14, 40);
+  doc.text("PAN & IEC: AAHCI6485M", 14, 45);
+
+  // Contact details - right side
+  doc.text("Phone: 98141-10981 | 99076-00034", pageWidth - 14, 35, { align: "right" });
+  doc.text("Email: Dinesh@indotechmetals.com", pageWidth - 14, 40, { align: "right" });
+  doc.text("www.indotechmetals.com", pageWidth - 14, 45, { align: "right" });
+
+  // Quotation title with copper accent
+  doc.setFillColor(...copper);
+  doc.rect(pageWidth - 60, 52, 46, 8, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.text("QUOTATION", pageWidth - 37, 58, { align: "center" });
 
   // Date
   const infoStartY = 65;
