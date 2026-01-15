@@ -2,8 +2,25 @@ import jsPDF from "jspdf";
 import { InvoiceData, CalculatedValues } from "@/types/invoice";
 import { formatCurrency, formatDate } from "./invoiceCalculations";
 
-// Convert image to base64 for PDF embedding (returns base64 and original dimensions)
-const getImageBase64WithDimensions = async (imagePath: string): Promise<{ base64: string; width: number; height: number } | null> => {
+// Fetch image as binary and convert to base64 WITHOUT canvas re-encoding
+const fetchImageAsBase64 = async (imagePath: string): Promise<string | null> => {
+  try {
+    const response = await fetch(imagePath);
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+};
+
+// Simple base64 helper for signature (uses canvas for webp compatibility)
+const getImageBase64 = async (imagePath: string): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -13,21 +30,11 @@ const getImageBase64WithDimensions = async (imagePath: string): Promise<{ base64
       canvas.height = img.height;
       const ctx = canvas.getContext("2d");
       ctx?.drawImage(img, 0, 0);
-      resolve({
-        base64: canvas.toDataURL("image/jpeg"),
-        width: img.width,
-        height: img.height
-      });
+      resolve(canvas.toDataURL("image/png"));
     };
-    img.onerror = () => resolve(null);
+    img.onerror = () => resolve("");
     img.src = imagePath;
   });
-};
-
-// Simple base64 helper for signature
-const getImageBase64 = async (imagePath: string): Promise<string> => {
-  const result = await getImageBase64WithDimensions(imagePath);
-  return result?.base64 || "";
 };
 
 export const generatePDF = async (
@@ -42,19 +49,20 @@ export const generatePDF = async (
   const brandBrown = [74, 44, 26] as const;     // #4A2C1A - dark brown
   const black = [30, 30, 30] as const;          // near black for body text
 
-// Pure white background (no colored header bar)
-  // Logo centered at top - compact size (25-28% of page width)
+  // Pure white background (no colored header bar)
+  // Logo centered at top - using binary fetch for original quality
   let logoBottomY = 36; // Default if logo fails to load
   try {
-    const logoData = await getImageBase64WithDimensions("/images/logo.jpg");
-    if (logoData) {
+    const logoBase64 = await fetchImageAsBase64("/images/logo-hq.png");
+    if (logoBase64) {
+      // Get image properties from jsPDF for accurate dimensions
+      const props = doc.getImageProperties(logoBase64);
       // Logo width ~55mm (about 26% of A4 width), height calculated from actual aspect ratio
       const logoWidth = 55;
-      const aspectRatio = logoData.height / logoData.width;
-      const logoHeight = logoWidth * aspectRatio; // Maintain true aspect ratio
+      const logoHeight = logoWidth * (props.height / props.width); // Maintain true aspect ratio
       const logoX = (pageWidth - logoWidth) / 2;
       const logoY = 15; // 15mm top margin
-      doc.addImage(logoData.base64, "JPEG", logoX, logoY, logoWidth, logoHeight);
+      doc.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
       logoBottomY = logoY + logoHeight; // Track where logo ends
     }
   } catch (e) {
