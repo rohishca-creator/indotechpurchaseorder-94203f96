@@ -3,7 +3,7 @@ import { InvoiceData, CalculatedValues } from "@/types/invoice";
 import { formatCurrency, formatDate } from "./invoiceCalculations";
 
 // Convert image to base64 for PDF embedding
-const getLogoBase64 = async (): Promise<string> => {
+const getImageBase64 = async (imagePath: string): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -13,10 +13,10 @@ const getLogoBase64 = async (): Promise<string> => {
       canvas.height = img.height;
       const ctx = canvas.getContext("2d");
       ctx?.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
+      resolve(canvas.toDataURL("image/jpeg"));
     };
     img.onerror = () => resolve("");
-    img.src = "/images/logo.png";
+    img.src = imagePath;
   });
 };
 
@@ -37,11 +37,11 @@ export const generatePDF = async (
   doc.setFillColor(...tealDark);
   doc.rect(0, 0, pageWidth, 60, "F");
 
-  // Add logo on left side
+  // Add logo on left side (using JPG with cream background for visibility)
   try {
-    const logoBase64 = await getLogoBase64();
+    const logoBase64 = await getImageBase64("/images/logo.jpg");
     if (logoBase64) {
-      doc.addImage(logoBase64, "PNG", 14, 8, 40, 14);
+      doc.addImage(logoBase64, "JPEG", 14, 6, 42, 16);
     }
   } catch (e) {
     console.log("Logo could not be loaded");
@@ -133,7 +133,7 @@ export const generatePDF = async (
   doc.text("DESCRIPTION", 18, tableY + 7);
   doc.text("QTY (KG)", 90, tableY + 7);
   doc.text("COILS", 120, tableY + 7);
-  doc.text("RATE (₹/KG)", 145, tableY + 7);
+  doc.text("RATE (Rs/KG)", 145, tableY + 7);
 
   // Table row
   const rowY = tableY + 10;
@@ -190,11 +190,20 @@ export const generatePDF = async (
   doc.setFont("helvetica", "normal");
   doc.text("Thank you for your business!", pageWidth / 2, footerY + 8, { align: "center" });
 
-  // Signature area
-  doc.setTextColor(...black);
+  // Digital Signature area - Dinesh Mehta, Managing Director
+  try {
+    const signatureBase64 = await getImageBase64("/images/signature.webp");
+    if (signatureBase64) {
+      doc.addImage(signatureBase64, "WEBP", pageWidth - 65, footerY - 45, 50, 30);
+    }
+  } catch (e) {
+    console.log("Signature could not be loaded");
+  }
+  
+  doc.setTextColor(...tealDark);
   doc.setFontSize(9);
-  doc.text("Authorized Signatory", pageWidth - 45, footerY - 15);
-  doc.line(pageWidth - 70, footerY - 20, pageWidth - 20, footerY - 20);
+  doc.setFont("helvetica", "bold");
+  doc.text("For INDOTECH METALS PVT. LTD.", pageWidth - 40, footerY - 8, { align: "center" });
 
   return doc;
 };
