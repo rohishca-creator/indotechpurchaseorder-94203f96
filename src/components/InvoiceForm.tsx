@@ -57,9 +57,9 @@ const InvoiceForm = () => {
     return true;
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!validateForm()) return;
-    downloadPDF(formData, calculations);
+    await downloadPDF(formData, calculations);
     toast({
       title: "PDF Generated!",
       description: "Quotation downloaded successfully",
