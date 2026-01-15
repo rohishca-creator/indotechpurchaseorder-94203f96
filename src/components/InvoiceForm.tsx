@@ -10,6 +10,7 @@ import { toast } from "@/hooks/use-toast";
 const paymentTermsOptions = [
   "5 Days",
   "7 Days",
+  "Same Day RTGS",
   "Next Day RTGS",
   "Advance Payment",
 ];
