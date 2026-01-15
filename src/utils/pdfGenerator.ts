@@ -160,7 +160,7 @@ export const generatePDF = async (
   doc.setTextColor(...black);
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text("Copper Wire Rod", 18, rowY + 8);
+  doc.text(data.itemDescription || "Copper Wire Rod", 18, rowY + 8);
   doc.text(data.quantity.toLocaleString("en-IN"), 88, rowY + 8);
   doc.text(data.numberOfCoils.toString(), 118, rowY + 8);
   doc.text(formatCurrency(data.rate).replace("₹", ""), 143, rowY + 8);
@@ -216,7 +216,12 @@ export const generatePDF = async (
   doc.setTextColor(...black);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("Thank you for your business!", pageWidth / 2, footerY + 8, { align: "center" });
+  doc.text("Thank you for your business!", pageWidth / 2, footerY + 6, { align: "center" });
+
+  // GST note
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...brandCopper);
+  doc.text("GST 18% Extra", pageWidth / 2, footerY + 12, { align: "center" });
 
   // Digital Signature area - Dinesh Mehta, Managing Director
   try {

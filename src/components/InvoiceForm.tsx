@@ -15,6 +15,11 @@ const paymentTermsOptions = [
   "Advance Payment",
 ];
 
+const itemDescriptionOptions = [
+  "Copper Wire Rod 8 mm",
+  "Copper Wire Rod 12 mm",
+];
+
 const quantityOptions = [
   1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
   11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000,
@@ -31,6 +36,7 @@ const InvoiceForm = () => {
     partyPhone: "",
     partyEmail: "",
     brokerName: "",
+    itemDescription: "Copper Wire Rod 8 mm",
     quantity: 0,
     numberOfCoils: 0,
     rate: 0,
@@ -78,7 +84,7 @@ const InvoiceForm = () => {
     if (!validateForm()) return;
     
     // Create message text
-    const message = `*Copper Wire Rod Quotation*
+    const message = `*${formData.itemDescription} Quotation*
 
 📅 Date: ${formatDate(formData.invoiceDate)}
 ${formData.deliveryDate ? `📦 Delivery Date: ${formatDate(formData.deliveryDate)}` : ""}
@@ -88,12 +94,15 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
 🤝 Broker: ${formData.brokerName}` : ""}
 
 📦 *Order Details:*
+• Item: ${formData.itemDescription}
 • Quantity: ${formData.quantity.toLocaleString("en-IN")} kg
 • Coils: ${formData.numberOfCoils}
 • Rate: ${formatCurrency(formData.rate)}/kg
 
 📋 Payment Terms: ${formData.paymentTerms}
-🚚 Station: ${formData.station || "TBD"}${formData.notes ? `
+🚚 Station: ${formData.station || "TBD"}
+
+💡 *GST 18% Extra*${formData.notes ? `
 
 📝 Notes: ${formData.notes}` : ""}`;
 
@@ -122,6 +131,7 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
       partyPhone: "",
       partyEmail: "",
       brokerName: "",
+      itemDescription: "Copper Wire Rod 8 mm",
       quantity: 0,
       numberOfCoils: 0,
       rate: 0,
@@ -239,6 +249,21 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
             </h2>
 
             <div className="space-y-4">
+              <div>
+                <label className="label-text">Item Description *</label>
+                <select
+                  value={formData.itemDescription}
+                  onChange={(e) => handleInputChange("itemDescription", e.target.value)}
+                  className="input-field cursor-pointer"
+                >
+                  {itemDescriptionOptions.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label-text">Quantity (kg) *</label>
