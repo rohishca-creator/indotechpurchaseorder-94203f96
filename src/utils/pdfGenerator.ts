@@ -33,55 +33,56 @@ export const generatePDF = async (
   const black = [30, 30, 30] as const;          // near black for body text
 
 // Pure white background (no colored header bar)
-  // Logo centered at top with transparent background - embedded as PNG raster image
+  // Logo centered at top - small and neat (35-40% of page width)
   try {
-    const logoBase64 = await getImageBase64("/images/logo-white.png");
+    const logoBase64 = await getImageBase64("/images/logo.jpg");
     if (logoBase64) {
-      // Center the logo horizontally - larger size for better visibility
-      const logoWidth = 80;
-      const logoHeight = 30;
+      // Logo width ~75mm (about 38% of A4 width), maintaining aspect ratio
+      const logoWidth = 75;
+      const logoHeight = 28; // Maintains approx. original aspect ratio
       const logoX = (pageWidth - logoWidth) / 2;
-      // Use PNG format to preserve full color (copper + brown)
-      doc.addImage(logoBase64, "PNG", logoX, 6, logoWidth, logoHeight);
+      const logoY = 12; // Top margin ~12mm (adjusted for visual balance)
+      // Use JPEG format for full color preservation
+      doc.addImage(logoBase64, "JPEG", logoX, logoY, logoWidth, logoHeight);
     }
   } catch (e) {
     console.log("Logo could not be loaded");
   }
 
-  // Company name - centered under logo, dark brown
+  // Company name - centered under logo, dark brown (8-10mm gap from logo bottom)
   doc.setTextColor(...brandBrown);
   doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("INDOTECH METALS PRIVATE LIMITED", pageWidth / 2, 38, { align: "center" });
+  doc.text("INDOTECH METALS PRIVATE LIMITED", pageWidth / 2, 50, { align: "center" });
   
   // Tagline
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...black);
-  doc.text("Manufacturers of Copper Wire Rod, Copper Strip & PVC Insulated Cables", pageWidth / 2, 44, { align: "center" });
+  doc.text("Manufacturers of Copper Wire Rod, Copper Strip & PVC Insulated Cables", pageWidth / 2, 56, { align: "center" });
 
   // Company address - centered
   doc.setFontSize(8);
-  doc.text("Transport Nagar Road, Sector-17/A, Ambey Majra, Mandi Gobindgarh, Distt-Fatehgarh Sahib, Punjab (147301), India", pageWidth / 2, 50, { align: "center" });
+  doc.text("Transport Nagar Road, Sector-17/A, Ambey Majra, Mandi Gobindgarh, Distt-Fatehgarh Sahib, Punjab (147301), India", pageWidth / 2, 62, { align: "center" });
 
   // Registration & Contact details - centered
   doc.setFontSize(7);
-  doc.text("CIN: U24109PB2024PTC061421 | GSTIN: 03AAHCI6485M1Z3 | PAN & IEC: AAHCI6485M", pageWidth / 2, 56, { align: "center" });
-  doc.text("Phone: 98141-10981 | 99076-00034 | Email: Dinesh@indotechmetals.com | www.indotechmetals.com", pageWidth / 2, 61, { align: "center" });
+  doc.text("CIN: U24109PB2024PTC061421 | GSTIN: 03AAHCI6485M1Z3 | PAN & IEC: AAHCI6485M", pageWidth / 2, 68, { align: "center" });
+  doc.text("Phone: 98141-10981 | 99076-00034 | Email: Dinesh@indotechmetals.com | www.indotechmetals.com", pageWidth / 2, 73, { align: "center" });
 
   // Copper accent line under header
   doc.setDrawColor(...brandCopper);
   doc.setLineWidth(0.8);
-  doc.line(14, 66, pageWidth - 14, 66);
+  doc.line(14, 78, pageWidth - 14, 78);
 
   // Order Confirmation title - dark brown, no background
   doc.setTextColor(...brandBrown);
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("ORDER CONFIRMATION", pageWidth / 2, 76, { align: "center" });
+  doc.text("ORDER CONFIRMATION", pageWidth / 2, 88, { align: "center" });
 
   // Date
-  const infoStartY = 85;
+  const infoStartY = 97;
   doc.setTextColor(...black);
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
