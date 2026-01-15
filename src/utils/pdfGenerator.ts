@@ -32,15 +32,17 @@ export const generatePDF = async (
   const brandBrown = [74, 44, 26] as const;     // #4A2C1A - dark brown
   const black = [30, 30, 30] as const;          // near black for body text
 
-  // Pure white background (no colored header bar)
-  // Logo centered at top with transparent background
+// Pure white background (no colored header bar)
+  // Logo centered at top with transparent background - embedded as PNG raster image
   try {
     const logoBase64 = await getImageBase64("/images/logo-white.png");
     if (logoBase64) {
-      // Center the logo horizontally
-      const logoWidth = 60;
+      // Center the logo horizontally - larger size for better visibility
+      const logoWidth = 80;
+      const logoHeight = 30;
       const logoX = (pageWidth - logoWidth) / 2;
-      doc.addImage(logoBase64, "PNG", logoX, 8, logoWidth, 22);
+      // Use PNG format to preserve full color (copper + brown)
+      doc.addImage(logoBase64, "PNG", logoX, 6, logoWidth, logoHeight);
     }
   } catch (e) {
     console.log("Logo could not be loaded");
