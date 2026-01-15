@@ -27,14 +27,14 @@ export const generatePDF = async (
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   
-  // Colors
-  const tealDark = [26, 78, 78] as const;
-  const copper = [191, 107, 51] as const;
+  // Brand Colors - Indotech Metals
+  const brandCopper = [201, 124, 60] as const;  // #C97C3C - copper/orange from logo
+  const brandBrown = [74, 44, 26] as const;     // #4A2C1A - dark brown from logo
   const gray = [100, 100, 100] as const;
-  const black = [30, 40, 45] as const;
+  const lightCopper = [230, 180, 140] as const; // lighter copper for backgrounds
 
-  // Header background
-  doc.setFillColor(...tealDark);
+  // Header background - warm copper/brown gradient feel
+  doc.setFillColor(...brandBrown);
   doc.rect(0, 0, pageWidth, 60, "F");
 
   // Add logo on left side (using PNG with transparent background, original proportions)
@@ -73,7 +73,7 @@ export const generatePDF = async (
   doc.text("www.indotechmetals.com", pageWidth - 14, 45, { align: "right" });
 
   // Order Confirmation title with copper accent
-  doc.setFillColor(...copper);
+  doc.setFillColor(...brandCopper);
   doc.rect(pageWidth - 70, 52, 56, 8, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(10);
@@ -82,7 +82,7 @@ export const generatePDF = async (
 
   // Date
   const infoStartY = 65;
-  doc.setTextColor(...black);
+  doc.setTextColor(...brandBrown);
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.text("Date:", 14, infoStartY);
@@ -90,21 +90,21 @@ export const generatePDF = async (
   doc.text(formatDate(data.invoiceDate), 32, infoStartY);
 
   // Divider line
-  doc.setDrawColor(...copper);
+  doc.setDrawColor(...brandCopper);
   doc.setLineWidth(0.5);
   doc.line(14, infoStartY + 5, pageWidth - 14, infoStartY + 5);
 
   // Bill To section
   const billToY = infoStartY + 15;
-  doc.setFillColor(245, 245, 245);
+  doc.setFillColor(250, 245, 240);  // warm off-white background
   doc.rect(14, billToY - 5, pageWidth - 28, 35, "F");
   
-  doc.setTextColor(...tealDark);
+  doc.setTextColor(...brandBrown);
   doc.setFontSize(11);
   doc.setFont("helvetica", "bold");
   doc.text("TO:", 18, billToY + 3);
 
-  doc.setTextColor(...black);
+  doc.setTextColor(...brandBrown);
   doc.setFontSize(12);
   doc.text(data.partyName || "—", 18, billToY + 12);
   
@@ -115,7 +115,7 @@ export const generatePDF = async (
   if (data.partyPhone) doc.text(`Phone: ${data.partyPhone}`, 18, billToY + 25);
   if (data.partyEmail) doc.text(`Email: ${data.partyEmail}`, pageWidth / 2, billToY + 25);
   if (data.brokerName) {
-    doc.setTextColor(...copper);
+    doc.setTextColor(...brandCopper);
     doc.text(`Broker: ${data.brokerName}`, 18, billToY + 31);
     doc.setTextColor(...gray);
   }
@@ -124,7 +124,7 @@ export const generatePDF = async (
   const tableY = billToY + 45;
   
   // Table header
-  doc.setFillColor(...tealDark);
+  doc.setFillColor(...brandBrown);
   doc.rect(14, tableY, pageWidth - 28, 10, "F");
   
   doc.setTextColor(255, 255, 255);
@@ -139,10 +139,10 @@ export const generatePDF = async (
   const rowY = tableY + 10;
   doc.setFillColor(255, 255, 255);
   doc.rect(14, rowY, pageWidth - 28, 12, "F");
-  doc.setDrawColor(230, 230, 230);
+  doc.setDrawColor(...lightCopper);
   doc.line(14, rowY + 12, pageWidth - 14, rowY + 12);
 
-  doc.setTextColor(...black);
+  doc.setTextColor(...brandBrown);
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.text("Copper Wire Rod", 18, rowY + 8);
@@ -152,7 +152,7 @@ export const generatePDF = async (
 
   // Payment terms & Station
   const termsY = rowY + 35;
-  doc.setTextColor(...black);
+  doc.setTextColor(...brandBrown);
   doc.setFontSize(10);
 
   doc.setFont("helvetica", "bold");
@@ -181,7 +181,7 @@ export const generatePDF = async (
 
   // Footer
   const footerY = 270;
-  doc.setDrawColor(...tealDark);
+  doc.setDrawColor(...brandCopper);
   doc.setLineWidth(0.3);
   doc.line(14, footerY, pageWidth - 14, footerY);
 
@@ -200,7 +200,7 @@ export const generatePDF = async (
     console.log("Signature could not be loaded");
   }
   
-  doc.setTextColor(...tealDark);
+  doc.setTextColor(...brandBrown);
   doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
   doc.text("For INDOTECH METALS PVT. LTD.", pageWidth - 40, footerY - 8, { align: "center" });
