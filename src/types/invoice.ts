@@ -6,6 +6,7 @@ export interface InvoiceData {
   partyPhone: string;
   partyEmail: string;
   brokerName: string;
+  itemDescription: string;
   quantity: number;
   numberOfCoils: number;
   rate: number;
