@@ -37,11 +37,15 @@ export const generatePDF = async (
   doc.setFillColor(...tealDark);
   doc.rect(0, 0, pageWidth, 60, "F");
 
-  // Add logo on left side (using JPG with cream background for visibility)
+  // Add white rectangle behind logo for visibility
+  doc.setFillColor(255, 255, 255);
+  doc.rect(10, 4, 48, 20, "F");
+
+  // Add logo on left side (using PNG with white background for visibility)
   try {
-    const logoBase64 = await getImageBase64("/images/logo.jpg");
+    const logoBase64 = await getImageBase64("/images/logo-white.png");
     if (logoBase64) {
-      doc.addImage(logoBase64, "JPEG", 14, 6, 42, 16);
+      doc.addImage(logoBase64, "PNG", 12, 6, 44, 16);
     }
   } catch (e) {
     console.log("Logo could not be loaded");
