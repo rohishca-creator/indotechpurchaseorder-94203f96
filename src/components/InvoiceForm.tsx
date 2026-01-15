@@ -14,6 +14,13 @@ const paymentTermsOptions = [
   "Advance Payment",
 ];
 
+const quantityOptions = [
+  1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000,
+  11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000,
+];
+
+const coilsOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
 const InvoiceForm = () => {
   const [formData, setFormData] = useState<InvoiceData>({
     invoiceDate: new Date(),
@@ -234,25 +241,33 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label-text">Quantity (kg) *</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    min="0"
+                  <select
                     value={formData.quantity || ""}
                     onChange={(e) => handleInputChange("quantity", parseFloat(e.target.value) || 0)}
-                    className="input-field font-mono"
-                  />
+                    className="input-field font-mono cursor-pointer"
+                  >
+                    <option value="">Select quantity</option>
+                    {quantityOptions.map((qty) => (
+                      <option key={qty} value={qty}>
+                        {qty.toLocaleString("en-IN")} kg
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="label-text">Number of Coils</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    min="0"
+                  <select
                     value={formData.numberOfCoils || ""}
                     onChange={(e) => handleInputChange("numberOfCoils", parseInt(e.target.value) || 0)}
-                    className="input-field font-mono"
-                  />
+                    className="input-field font-mono cursor-pointer"
+                  >
+                    <option value="">Select coils</option>
+                    {coilsOptions.map((coil) => (
+                      <option key={coil} value={coil}>
+                        {coil}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
