@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Calendar, FileText, Download, Printer, Building2, User, Phone, Mail, MapPin, Package, Coins, CreditCard, Share2, RotateCcw } from "lucide-react";
+import { Calendar, FileText, Download, Printer, User, Phone, Mail, MapPin, Package, Coins, CreditCard, Share2, RotateCcw } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { InvoiceData } from "@/types/invoice";
 import { calculateInvoice, formatCurrency, formatDate } from "@/utils/invoiceCalculations";
@@ -7,12 +8,10 @@ import { downloadPDF } from "@/utils/pdfGenerator";
 import { toast } from "@/hooks/use-toast";
 
 const paymentTermsOptions = [
-  "Cash on Delivery",
-  "Net 7 Days",
-  "Net 15 Days",
-  "Net 30 Days",
+  "5 Days",
+  "7 Days",
+  "Next Day RTGS",
   "Advance Payment",
-  "50% Advance, 50% on Delivery",
 ];
 
 const InvoiceForm = () => {
@@ -27,7 +26,7 @@ const InvoiceForm = () => {
     quantity: 0,
     numberOfCoils: 0,
     rate: 0,
-    paymentTerms: "Net 30 Days",
+    paymentTerms: "5 Days",
     station: "",
     notes: "",
   });
@@ -132,14 +131,8 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
       {/* Header */}
       <header className="invoice-header text-primary-foreground py-6 px-4 no-print">
         <div className="container max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-copper flex items-center justify-center">
-              <Building2 className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold">Indotech Metals Pvt Ltd</h1>
-              <p className="text-sm opacity-90">Premium Copper Wire Rod Manufacturers</p>
-            </div>
+          <div className="flex items-center gap-4">
+            <img src={logo} alt="Indotech Logo" className="h-14 md:h-16 w-auto" />
           </div>
           <p className="text-sm opacity-75 mt-2">
             <MapPin className="w-4 h-4 inline mr-1" />
