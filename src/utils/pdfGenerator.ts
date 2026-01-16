@@ -2,8 +2,64 @@ import jsPDF from "jspdf";
 import { InvoiceData, CalculatedValues } from "@/types/invoice";
 import { formatCurrency, formatDate } from "./invoiceCalculations";
 
-// Fetch image as binary and convert to base64 WITHOUT canvas re-encoding
-const fetchImageAsBase64 = async (imagePath: string): Promise<string | null> => {
+// Compress and resize image to reduce PDF size while maintaining quality
+const compressImage = async (
+  imagePath: string, 
+  maxWidth: number = 600, 
+  quality: number = 0.85,
+  format: "jpeg" | "png" = "jpeg"
+): Promise<{ base64: string; width: number; height: number } | null> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      // Calculate new dimensions while maintaining aspect ratio
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+      
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      
+      if (ctx) {
+        // Enable image smoothing for better quality
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        
+        // For PNG with transparency, use white background to avoid color issues
+        if (format === "jpeg") {
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(0, 0, width, height);
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const mimeType = format === "jpeg" ? "image/jpeg" : "image/png";
+        const base64 = canvas.toDataURL(mimeType, quality);
+        resolve({ base64, width, height });
+      } else {
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = imagePath;
+  });
+};
+
+// Fetch image as binary and convert to base64 WITH optional compression
+const fetchImageAsBase64 = async (imagePath: string, compress: boolean = false): Promise<string | null> => {
+  if (compress) {
+    // Use compression for better file size
+    const result = await compressImage(imagePath, 500, 0.9, "jpeg");
+    return result?.base64 || null;
+  }
+  
   try {
     const response = await fetch(imagePath);
     if (!response.ok) return null;
@@ -19,22 +75,10 @@ const fetchImageAsBase64 = async (imagePath: string): Promise<string | null> => 
   }
 };
 
-// Simple base64 helper for signature (uses canvas for webp compatibility)
+// Compress signature image
 const getImageBase64 = async (imagePath: string): Promise<string> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx?.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
-    };
-    img.onerror = () => resolve("");
-    img.src = imagePath;
-  });
+  const result = await compressImage(imagePath, 300, 0.8, "png");
+  return result?.base64 || ""
 };
 
 export const generatePDF = async (
@@ -53,7 +97,8 @@ export const generatePDF = async (
   // Logo centered at top - using binary fetch for original quality
   let logoBottomY = 36; // Default if logo fails to load
   try {
-    const logoBase64 = await fetchImageAsBase64("/images/logo-hq.png");
+    // Use compressed JPEG for logo to reduce file size while maintaining quality
+    const logoBase64 = await fetchImageAsBase64("/images/logo-hq.png", true);
     if (logoBase64) {
       // Get image properties from jsPDF for accurate dimensions
       const props = doc.getImageProperties(logoBase64);
@@ -62,7 +107,7 @@ export const generatePDF = async (
       const logoHeight = logoWidth * (props.height / props.width); // Maintain true aspect ratio
       const logoX = (pageWidth - logoWidth) / 2;
       const logoY = 15; // 15mm top margin
-      doc.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
+      doc.addImage(logoBase64, "JPEG", logoX, logoY, logoWidth, logoHeight);
       logoBottomY = logoY + logoHeight; // Track where logo ends
     }
   } catch (e) {
