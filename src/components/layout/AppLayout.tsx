@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { FilePlus, List, Truck, LogOut, User } from 'lucide-react';
+import { FilePlus, List, Truck, LogOut, User, Users } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 interface AppLayoutProps {
@@ -13,6 +13,7 @@ const navItems = [
   { path: '/', label: 'New Order', icon: FilePlus },
   { path: '/orders', label: 'Orders', icon: List },
   { path: '/dispatch', label: 'Dispatch', icon: Truck },
+  { path: '/parties', label: 'Parties', icon: Users },
 ];
 
 const AppLayout = ({ children }: AppLayoutProps) => {

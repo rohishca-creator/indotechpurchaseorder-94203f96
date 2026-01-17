@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Orders from "./pages/Orders";
 import Dispatch from "./pages/Dispatch";
 import OrderDetail from "./pages/OrderDetail";
+import Parties from "./pages/Parties";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <Dispatch />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/parties"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Parties />
                   </AppLayout>
                 </ProtectedRoute>
               }
