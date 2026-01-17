@@ -77,16 +77,20 @@ export const useCreateParty = () => {
         description: 'New party has been saved successfully',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: Error & { name?: string }) => {
       console.error('[parties] Create mutation error:', error);
-      const isNetworkError = error.message.includes('timed out') || 
-                             error.message.includes('network') ||
-                             error.message.includes('Failed to fetch');
+      const isAbortError = error.name === 'AbortError' || error.message?.includes('signal is aborted');
+      const isNetworkError = isAbortError ||
+                             error.message?.includes('timed out') || 
+                             error.message?.includes('network') ||
+                             error.message?.includes('Failed to fetch');
       toast({
         title: isNetworkError ? 'Network Error' : 'Error',
-        description: isNetworkError 
-          ? 'Request failed. Try disabling VPN/adblock or check your connection.' 
-          : (error.message || 'Failed to add party'),
+        description: isAbortError
+          ? 'Request was blocked/aborted. Try disabling VPN/adblock or check your network.'
+          : isNetworkError 
+            ? 'Request failed. Try disabling VPN/adblock or check your connection.' 
+            : (error.message || 'Failed to add party'),
         variant: 'destructive',
       });
     },
@@ -125,16 +129,20 @@ export const useUpdateParty = () => {
         description: 'Party information has been updated',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: Error & { name?: string }) => {
       console.error('[parties] Update mutation error:', error);
-      const isNetworkError = error.message.includes('timed out') || 
-                             error.message.includes('network') ||
-                             error.message.includes('Failed to fetch');
+      const isAbortError = error.name === 'AbortError' || error.message?.includes('signal is aborted');
+      const isNetworkError = isAbortError ||
+                             error.message?.includes('timed out') || 
+                             error.message?.includes('network') ||
+                             error.message?.includes('Failed to fetch');
       toast({
         title: isNetworkError ? 'Network Error' : 'Error',
-        description: isNetworkError 
-          ? 'Request failed. Try disabling VPN/adblock or check your connection.' 
-          : (error.message || 'Failed to update party'),
+        description: isAbortError
+          ? 'Request was blocked/aborted. Try disabling VPN/adblock or check your network.'
+          : isNetworkError 
+            ? 'Request failed. Try disabling VPN/adblock or check your connection.' 
+            : (error.message || 'Failed to update party'),
         variant: 'destructive',
       });
     },
@@ -172,16 +180,20 @@ export const useDeleteParty = () => {
         description: 'Party has been removed',
       });
     },
-    onError: (error: Error) => {
+    onError: (error: Error & { name?: string }) => {
       console.error('[parties] Delete mutation error:', error);
-      const isNetworkError = error.message.includes('timed out') || 
-                             error.message.includes('network') ||
-                             error.message.includes('Failed to fetch');
+      const isAbortError = error.name === 'AbortError' || error.message?.includes('signal is aborted');
+      const isNetworkError = isAbortError ||
+                             error.message?.includes('timed out') || 
+                             error.message?.includes('network') ||
+                             error.message?.includes('Failed to fetch');
       toast({
         title: isNetworkError ? 'Network Error' : 'Error',
-        description: isNetworkError 
-          ? 'Request failed. Try disabling VPN/adblock or check your connection.' 
-          : (error.message || 'Failed to delete party'),
+        description: isAbortError
+          ? 'Request was blocked/aborted. Try disabling VPN/adblock or check your network.'
+          : isNetworkError 
+            ? 'Request failed. Try disabling VPN/adblock or check your connection.' 
+            : (error.message || 'Failed to delete party'),
         variant: 'destructive',
       });
     },

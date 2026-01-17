@@ -31,13 +31,33 @@ if (rootElement) {
   `;
 }
 
+// Helper to check if error is a recoverable AbortError
+const isAbortError = (err: unknown): boolean => {
+  if (!err) return false;
+  const error = err as { name?: string; message?: string };
+  return error.name === 'AbortError' || 
+         (typeof error.message === 'string' && error.message.includes('signal is aborted'));
+};
+
 window.addEventListener("error", (e) => {
   const err = (e as ErrorEvent).error;
+  // AbortError is recoverable - don't crash the app
+  if (isAbortError(err)) {
+    console.warn('[app] Recoverable AbortError caught:', err?.message);
+    e.preventDefault();
+    return;
+  }
   renderFatal("App failed to load", err?.message || (e as ErrorEvent).message);
 });
 
 window.addEventListener("unhandledrejection", (e) => {
   const reason = (e as PromiseRejectionEvent).reason;
+  // AbortError is recoverable - don't crash the app
+  if (isAbortError(reason)) {
+    console.warn('[app] Recoverable AbortError (rejection) caught:', reason?.message);
+    e.preventDefault();
+    return;
+  }
   renderFatal("App failed to load", reason?.message || String(reason));
 });
 
