@@ -37,6 +37,14 @@ const EditPartyDialog = ({ party, open, onOpenChange }: EditPartyDialogProps) =>
     });
   }, [party]);
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Reset mutation state when dialog closes
+      updateParty.reset();
+    }
+    onOpenChange(newOpen);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -46,9 +54,9 @@ const EditPartyDialog = ({ party, open, onOpenChange }: EditPartyDialogProps) =>
 
     try {
       await updateParty.mutateAsync({ id: party.id, ...formData });
-      onOpenChange(false);
+      handleOpenChange(false);
     } catch (error) {
-      // Error is handled by the mutation
+      // Error is handled by the mutation, loading state will be cleared
     }
   };
 
@@ -57,7 +65,7 @@ const EditPartyDialog = ({ party, open, onOpenChange }: EditPartyDialogProps) =>
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Party</DialogTitle>
@@ -127,7 +135,7 @@ const EditPartyDialog = ({ party, open, onOpenChange }: EditPartyDialogProps) =>
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={updateParty.isPending}
             >
               Cancel

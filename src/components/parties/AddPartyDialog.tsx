@@ -28,6 +28,19 @@ const AddPartyDialog = ({ open, onOpenChange, onSuccess, initialData }: AddParty
     station: initialData?.station || '',
   });
 
+  const resetForm = () => {
+    setFormData({ name: '', address: '', phone: '', email: '', station: '' });
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Reset mutation state and form when dialog closes
+      createParty.reset();
+      resetForm();
+    }
+    onOpenChange(newOpen);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -37,11 +50,10 @@ const AddPartyDialog = ({ open, onOpenChange, onSuccess, initialData }: AddParty
 
     try {
       const newParty = await createParty.mutateAsync(formData);
-      onOpenChange(false);
-      setFormData({ name: '', address: '', phone: '', email: '', station: '' });
+      handleOpenChange(false);
       onSuccess?.(newParty);
     } catch (error) {
-      // Error is handled by the mutation
+      // Error is handled by the mutation, loading state will be cleared
     }
   };
 
@@ -50,7 +62,7 @@ const AddPartyDialog = ({ open, onOpenChange, onSuccess, initialData }: AddParty
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -124,7 +136,7 @@ const AddPartyDialog = ({ open, onOpenChange, onSuccess, initialData }: AddParty
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={createParty.isPending}
             >
               Cancel
