@@ -2,17 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/runtimeClient';
 import { toast } from '@/hooks/use-toast';
 
-// Timeout wrapper to prevent infinite loading
-const withTimeout = <T,>(promiseLike: PromiseLike<T>, timeoutMs = 15000): Promise<T> => {
-  const promise = Promise.resolve(promiseLike);
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error('Request timed out. Please check your connection and try again.')), timeoutMs)
-    ),
-  ]);
-};
-
 export interface Party {
   id: string;
   name: string;
@@ -61,16 +50,15 @@ export const useCreateParty = () => {
 
   return useMutation({
     mutationFn: async (partyData: CreatePartyData) => {
-      const { data, error } = await withTimeout(
-        supabase
-          .from('parties')
-          .insert([partyData])
-          .select()
-          .single()
-      );
+      console.log('[parties] Creating party:', partyData);
+      
+      // Simple insert without .select().single() to reduce server work
+      const { error } = await supabase
+        .from('parties')
+        .insert([partyData]);
 
       if (error) {
-        console.error('Create party error:', {
+        console.error('[parties] Create error:', {
           message: error.message,
           code: error.code,
           details: error.details,
@@ -79,7 +67,8 @@ export const useCreateParty = () => {
         throw error;
       }
 
-      return data as Party;
+      console.log('[parties] Create success');
+      return partyData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parties'] });
@@ -89,10 +78,15 @@ export const useCreateParty = () => {
       });
     },
     onError: (error: Error) => {
-      console.error('Create party mutation error:', error);
+      console.error('[parties] Create mutation error:', error);
+      const isNetworkError = error.message.includes('timed out') || 
+                             error.message.includes('network') ||
+                             error.message.includes('Failed to fetch');
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to add party',
+        title: isNetworkError ? 'Network Error' : 'Error',
+        description: isNetworkError 
+          ? 'Request failed. Try disabling VPN/adblock or check your connection.' 
+          : (error.message || 'Failed to add party'),
         variant: 'destructive',
       });
     },
@@ -104,17 +98,15 @@ export const useUpdateParty = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...partyData }: CreatePartyData & { id: string }) => {
-      const { data, error } = await withTimeout(
-        supabase
-          .from('parties')
-          .update(partyData)
-          .eq('id', id)
-          .select()
-          .single()
-      );
+      console.log('[parties] Updating party:', id, partyData);
+      
+      const { error } = await supabase
+        .from('parties')
+        .update(partyData)
+        .eq('id', id);
 
       if (error) {
-        console.error('Update party error:', {
+        console.error('[parties] Update error:', {
           message: error.message,
           code: error.code,
           details: error.details,
@@ -123,7 +115,8 @@ export const useUpdateParty = () => {
         throw error;
       }
 
-      return data as Party;
+      console.log('[parties] Update success');
+      return { id, ...partyData };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parties'] });
@@ -133,10 +126,15 @@ export const useUpdateParty = () => {
       });
     },
     onError: (error: Error) => {
-      console.error('Update party mutation error:', error);
+      console.error('[parties] Update mutation error:', error);
+      const isNetworkError = error.message.includes('timed out') || 
+                             error.message.includes('network') ||
+                             error.message.includes('Failed to fetch');
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to update party',
+        title: isNetworkError ? 'Network Error' : 'Error',
+        description: isNetworkError 
+          ? 'Request failed. Try disabling VPN/adblock or check your connection.' 
+          : (error.message || 'Failed to update party'),
         variant: 'destructive',
       });
     },
@@ -148,15 +146,15 @@ export const useDeleteParty = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await withTimeout(
-        supabase
-          .from('parties')
-          .delete()
-          .eq('id', id)
-      );
+      console.log('[parties] Deleting party:', id);
+      
+      const { error } = await supabase
+        .from('parties')
+        .delete()
+        .eq('id', id);
 
       if (error) {
-        console.error('Delete party error:', {
+        console.error('[parties] Delete error:', {
           message: error.message,
           code: error.code,
           details: error.details,
@@ -164,6 +162,8 @@ export const useDeleteParty = () => {
         });
         throw error;
       }
+      
+      console.log('[parties] Delete success');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parties'] });
@@ -173,10 +173,15 @@ export const useDeleteParty = () => {
       });
     },
     onError: (error: Error) => {
-      console.error('Delete party mutation error:', error);
+      console.error('[parties] Delete mutation error:', error);
+      const isNetworkError = error.message.includes('timed out') || 
+                             error.message.includes('network') ||
+                             error.message.includes('Failed to fetch');
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete party',
+        title: isNetworkError ? 'Network Error' : 'Error',
+        description: isNetworkError 
+          ? 'Request failed. Try disabling VPN/adblock or check your connection.' 
+          : (error.message || 'Failed to delete party'),
         variant: 'destructive',
       });
     },

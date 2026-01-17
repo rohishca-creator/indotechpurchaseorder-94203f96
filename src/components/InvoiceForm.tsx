@@ -81,8 +81,10 @@ const InvoiceForm = () => {
     }
   };
 
-  const handlePartyCreated = (party: Party) => {
-    handlePartySelect(party);
+  const handlePartyCreated = () => {
+    // Party was created with initialData, which already matches form data
+    // Just close dialog, the party list will refresh and user can select it
+    setAddPartyDialogOpen(false);
   };
 
   const validateForm = (): boolean => {

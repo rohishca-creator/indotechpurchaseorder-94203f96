@@ -9,12 +9,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useCreateParty, CreatePartyData, Party } from '@/hooks/useParties';
+import { useCreateParty, CreatePartyData } from '@/hooks/useParties';
+import { supabase } from '@/integrations/supabase/runtimeClient';
+import { toast } from '@/hooks/use-toast';
 
 interface AddPartyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: (party: Party) => void;
+  onSuccess?: () => void;
   initialData?: Partial<CreatePartyData>;
 }
 
@@ -34,7 +36,6 @@ const AddPartyDialog = ({ open, onOpenChange, onSuccess, initialData }: AddParty
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      // Reset mutation state and form when dialog closes
       createParty.reset();
       resetForm();
     }
@@ -48,12 +49,23 @@ const AddPartyDialog = ({ open, onOpenChange, onSuccess, initialData }: AddParty
       return;
     }
 
+    // Validate session before attempting save
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      toast({
+        title: 'Session Expired',
+        description: 'Please login again to save party.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
-      const newParty = await createParty.mutateAsync(formData);
+      await createParty.mutateAsync(formData);
       handleOpenChange(false);
-      onSuccess?.(newParty);
+      onSuccess?.();
     } catch (error) {
-      // Error is handled by the mutation, loading state will be cleared
+      // Error is handled by the mutation
     }
   };
 
