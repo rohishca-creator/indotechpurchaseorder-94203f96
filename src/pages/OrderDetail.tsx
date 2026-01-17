@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/runtimeClient';
-import { useUpdateOrderStatus, OrderStatus, Order } from '@/hooks/useOrders';
+import { useUpdateOrderStatus, useDeleteOrder, OrderStatus, Order } from '@/hooks/useOrders';
 import StatusBadge from '@/components/orders/StatusBadge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,6 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { downloadPDF } from '@/utils/pdfGenerator';
 import { calculateInvoice } from '@/utils/invoiceCalculations';
 import { InvoiceData } from '@/types/invoice';
@@ -25,7 +36,8 @@ import {
   Package, 
   Coins,
   FileText,
-  Loader2 
+  Loader2,
+  Trash2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -33,6 +45,17 @@ const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const updateStatus = useUpdateOrderStatus();
+  const deleteOrder = useDeleteOrder();
+
+  const handleDeleteOrder = () => {
+    if (order) {
+      deleteOrder.mutate(order.id, {
+        onSuccess: () => {
+          navigate('/orders');
+        },
+      });
+    }
+  };
 
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
@@ -143,6 +166,31 @@ const OrderDetail = () => {
             <Download className="w-4 h-4 mr-2" />
             Download PDF
           </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Order</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this order for {order.party_name}? This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteOrder}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
