@@ -11,10 +11,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f5f7fa' }}>
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" style={{ color: '#1a4e4e' }} />
+          <p style={{ color: '#666' }}>Loading...</p>
         </div>
       </div>
     );

@@ -86,9 +86,9 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#f5f7fa' }}>
       <div className="w-full max-w-md">
-        <div className="bg-card rounded-2xl shadow-lg p-8">
+        <div className="rounded-2xl shadow-lg p-8" style={{ backgroundColor: '#ffffff' }}>
           {/* Logo & Header */}
           <div className="text-center mb-8">
             <img src={logo} alt="Indotech Logo" className="h-16 mx-auto mb-4" />
