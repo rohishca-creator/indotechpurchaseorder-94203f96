@@ -160,6 +160,7 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
 
   return (
     <div className="bg-background">
+      <main className="container max-w-4xl mx-auto px-4 py-6">
         {/* Date & New Button */}
         <div className="bg-card rounded-xl shadow-card p-4 mb-6 animate-fade-in">
           <div className="flex flex-wrap items-center justify-between gap-4">
