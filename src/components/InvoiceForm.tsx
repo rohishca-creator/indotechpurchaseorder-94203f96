@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Calendar, FileText, Download, Printer, User, Phone, Mail, MapPin, Package, Coins, CreditCard, Share2, RotateCcw } from "lucide-react";
-import logo from "@/assets/logo.png";
+import { Calendar, FileText, Download, Printer, User, Phone, Mail, MapPin, Package, Coins, CreditCard, Share2, RotateCcw, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InvoiceData } from "@/types/invoice";
 import { calculateInvoice, formatCurrency, formatDate } from "@/utils/invoiceCalculations";
 import { downloadPDF } from "@/utils/pdfGenerator";
 import { toast } from "@/hooks/use-toast";
+import { useCreateOrder } from "@/hooks/useOrders";
 
 const paymentTermsOptions = [
   "5 Days",
@@ -28,6 +28,7 @@ const quantityOptions = [
 const coilsOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const InvoiceForm = () => {
+  const createOrder = useCreateOrder();
   const [formData, setFormData] = useState<InvoiceData>({
     invoiceDate: new Date(),
     deliveryDate: null,
@@ -144,22 +145,21 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
     });
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="invoice-header text-primary-foreground py-6 px-4 no-print">
-        <div className="container max-w-4xl mx-auto">
-          <div className="flex items-center gap-4">
-            <img src={logo} alt="Indotech Logo" className="h-14 md:h-16 w-auto" />
-          </div>
-          <p className="text-sm opacity-75 mt-2">
-            <MapPin className="w-4 h-4 inline mr-1" />
-            Mandi Gobindgarh, Punjab, India
-          </p>
-        </div>
-      </header>
+  const handleSaveOrder = async () => {
+    if (!validateForm()) return;
+    if (!formData.station.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter the delivery station for dispatch tracking",
+        variant: "destructive",
+      });
+      return;
+    }
+    await createOrder.mutateAsync(formData);
+  };
 
-      <main className="container max-w-4xl mx-auto px-4 py-6">
+  return (
+    <div className="bg-background">
         {/* Date & New Button */}
         <div className="bg-card rounded-xl shadow-card p-4 mb-6 animate-fade-in">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -414,6 +414,20 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 mt-8 no-print">
           <Button
+            variant="secondary"
+            size="lg"
+            className="flex-1"
+            onClick={handleSaveOrder}
+            disabled={createOrder.isPending}
+          >
+            {createOrder.isPending ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Save className="w-5 h-5" />
+            )}
+            Save Order
+          </Button>
+          <Button
             variant="copper"
             size="lg"
             className="flex-1"
@@ -450,11 +464,6 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
             Reset
           </Button>
         </div>
-
-        {/* Footer */}
-        <footer className="text-center text-muted-foreground text-sm mt-10 pb-6 no-print">
-          <p>© {new Date().getFullYear()} Indotech Metals Pvt Ltd. All rights reserved.</p>
-        </footer>
       </main>
     </div>
   );
