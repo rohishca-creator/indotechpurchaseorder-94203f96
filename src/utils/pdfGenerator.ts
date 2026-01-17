@@ -182,7 +182,7 @@ export const generatePDF = async (
   // Items table with copper borders
   const tableY = billToY + 38;
   const tableWidth = pageWidth - 28;
-  const colWidths = [70, 30, 25, 40]; // Description, Qty, Coils, Rate
+  const colWidths = [70, 30, 25, 40]; // Description, Qty, Wire Rod, Rate
   const colX = [14, 84, 114, 139];
   
   // Table header - white background with copper border
@@ -195,7 +195,7 @@ export const generatePDF = async (
   doc.setFont("helvetica", "bold");
   doc.text("DESCRIPTION", 18, tableY + 7);
   doc.text("QTY (KG)", 88, tableY + 7);
-  doc.text("COILS", 118, tableY + 7);
+  doc.text("WIRE ROD", 115, tableY + 7);
   doc.text("RATE (Rs/KG)", 143, tableY + 7);
 
   // Table row - white with copper border
