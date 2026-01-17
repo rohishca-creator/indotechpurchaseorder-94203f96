@@ -62,13 +62,14 @@ export const useAuth = () => {
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error checking org membership:', error);
+        setIsOrgMember(false);
+      } else {
+        setIsOrgMember(!!data);
       }
-      
-      setIsOrgMember(!!data);
     } catch (error) {
       console.error('Error checking org membership:', error);
       setIsOrgMember(false);
