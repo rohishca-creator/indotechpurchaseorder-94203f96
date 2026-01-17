@@ -78,11 +78,11 @@ export const useAuth = () => {
     }
   };
 
-  const withTimeout = async <T,>(promise: Promise<T>, timeoutMs = 15000): Promise<T> => {
+  const withTimeout = async <T,>(promise: Promise<T>, timeoutMs = 30000): Promise<T> => {
     return await Promise.race([
       promise,
       new Promise<T>((_, reject) =>
-        setTimeout(() => reject(new Error('Request timed out. Please check your internet and try again.')), timeoutMs)
+        setTimeout(() => reject(new Error('Login is taking longer than usual. Please check your internet connection and try again.')), timeoutMs)
       ),
     ]);
   };
