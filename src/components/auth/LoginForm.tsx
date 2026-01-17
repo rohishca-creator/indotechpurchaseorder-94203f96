@@ -30,7 +30,9 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
+          const message = typeof error?.message === 'string' ? error.message : String(error);
+
+          if (message.includes('Invalid login credentials')) {
             toast({
               title: 'Login Failed',
               description: 'Invalid email or password. Please try again.',
@@ -39,7 +41,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
           } else {
             toast({
               title: 'Login Failed',
-              description: error.message,
+              description: message,
               variant: 'destructive',
             });
           }
@@ -62,7 +64,9 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
 
         const { error } = await signUp(email, password, fullName);
         if (error) {
-          if (error.message.includes('already registered')) {
+          const message = typeof error?.message === 'string' ? error.message : String(error);
+
+          if (message.includes('already registered')) {
             toast({
               title: 'Account Exists',
               description: 'This email is already registered. Please log in instead.',
@@ -71,7 +75,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
           } else {
             toast({
               title: 'Signup Failed',
-              description: error.message,
+              description: message,
               variant: 'destructive',
             });
           }
@@ -82,6 +86,12 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
           });
         }
       }
+    } catch (err: any) {
+      toast({
+        title: 'Something went wrong',
+        description: err?.message ? String(err.message) : 'Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
