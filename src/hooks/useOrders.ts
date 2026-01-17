@@ -162,3 +162,33 @@ export const useUpdateOrderStatus = () => {
     },
   });
 };
+
+export const useDeleteOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders-by-station'] });
+      toast({
+        title: 'Order Deleted',
+        description: 'Order has been permanently deleted',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error Deleting Order',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+};

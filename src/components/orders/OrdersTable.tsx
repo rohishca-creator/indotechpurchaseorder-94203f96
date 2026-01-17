@@ -16,9 +16,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useOrders, useUpdateOrderStatus, OrderStatus } from '@/hooks/useOrders';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { useOrders, useUpdateOrderStatus, useDeleteOrder, OrderStatus } from '@/hooks/useOrders';
 import StatusBadge from './StatusBadge';
-import { Search, Loader2, MapPin, Eye } from 'lucide-react';
+import { Search, Loader2, MapPin, Eye, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const OrdersTable = () => {
@@ -26,9 +37,14 @@ const OrdersTable = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { data: orders, isLoading } = useOrders(statusFilter, searchQuery);
   const updateStatus = useUpdateOrderStatus();
+  const deleteOrder = useDeleteOrder();
 
   const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
     updateStatus.mutate({ orderId, status: newStatus });
+  };
+
+  const handleDeleteOrder = (orderId: string) => {
+    deleteOrder.mutate(orderId);
   };
 
   const formatDate = (dateString: string) => {
@@ -128,6 +144,30 @@ const OrdersTable = () => {
                           <SelectItem value="delivered">Delivered</SelectItem>
                         </SelectContent>
                       </Select>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Order</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete this order for {order.party_name}? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteOrder(order.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>
