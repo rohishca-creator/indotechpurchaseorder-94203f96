@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/runtimeClient';
 import { useUpdateOrderStatus, OrderStatus, Order } from '@/hooks/useOrders';
 import StatusBadge from '@/components/orders/StatusBadge';
 import { Button } from '@/components/ui/button';
