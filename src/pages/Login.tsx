@@ -13,6 +13,7 @@ const Login = () => {
     }
   }, [user, isOrgMember, loading, navigate]);
 
+  // Always show login form - it handles its own loading states
   return <LoginForm onSuccess={() => navigate('/', { replace: true })} />;
 };
 
