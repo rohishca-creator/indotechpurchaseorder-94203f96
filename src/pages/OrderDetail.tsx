@@ -203,7 +203,7 @@ const OrderDetail = () => {
                 <p className="font-mono font-medium">{order.quantity.toLocaleString('en-IN')} kg</p>
               </div>
               <div>
-                <span className="text-sm text-muted-foreground">Coils</span>
+                <span className="text-sm text-muted-foreground">Wire Rod</span>
                 <p className="font-mono font-medium">{order.number_of_coils}</p>
               </div>
             </div>

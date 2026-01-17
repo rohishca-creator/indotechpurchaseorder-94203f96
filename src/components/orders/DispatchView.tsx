@@ -57,6 +57,7 @@ const DispatchView = () => {
         const pendingCount = orders.filter((o) => o.status === 'pending').length;
         const confirmedCount = orders.filter((o) => o.status === 'confirmed').length;
         const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
+        const totalWireRod = orders.reduce((sum, o) => sum + o.number_of_coils, 0);
 
         return (
           <Collapsible
@@ -74,7 +75,7 @@ const DispatchView = () => {
                     <div className="text-left">
                       <h3 className="font-semibold text-foreground">{station}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {orders.length} order{orders.length > 1 ? 's' : ''} • {totalQty.toLocaleString('en-IN')} kg
+                        {orders.length} order{orders.length > 1 ? 's' : ''} • {totalWireRod} Wire Rod • {totalQty.toLocaleString('en-IN')} kg
                       </p>
                     </div>
                   </div>

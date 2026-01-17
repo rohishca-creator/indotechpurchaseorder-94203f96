@@ -28,7 +28,7 @@ const quantityOptions = [
   11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000,
 ];
 
-const coilsOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const wireRodOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const InvoiceForm = () => {
   const createOrder = useCreateOrder();
@@ -132,7 +132,7 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
 📦 *Order Details:*
 • Item: ${formData.itemDescription}
 • Quantity: ${formData.quantity.toLocaleString("en-IN")} kg
-• Coils: ${formData.numberOfCoils}
+• Wire Rod: ${formData.numberOfCoils}
 • Rate: ${formatCurrency(formData.rate)}/kg
 
 📋 Payment Terms: ${formData.paymentTerms}
@@ -328,16 +328,16 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
                   </select>
                 </div>
                 <div>
-                  <label className="label-text">Number of Coils</label>
+                  <label className="label-text">Number of Wire Rod</label>
                   <select
                     value={formData.numberOfCoils || ""}
                     onChange={(e) => handleInputChange("numberOfCoils", parseInt(e.target.value) || 0)}
                     className="input-field font-mono cursor-pointer"
                   >
-                    <option value="">Select coils</option>
-                    {coilsOptions.map((coil) => (
-                      <option key={coil} value={coil}>
-                        {coil}
+                    <option value="">Select Wire Rod</option>
+                    {wireRodOptions.map((num) => (
+                      <option key={num} value={num}>
+                        {num}
                       </option>
                     ))}
                   </select>
