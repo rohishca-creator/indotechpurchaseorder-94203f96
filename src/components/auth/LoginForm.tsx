@@ -21,7 +21,10 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
+    let shouldNavigate = false;
 
     try {
       if (isLogin) {
@@ -45,7 +48,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
             title: 'Welcome back!',
             description: 'You have successfully logged in.',
           });
-          onSuccess?.();
+          shouldNavigate = true;
         }
       } else {
         if (!fullName.trim()) {
@@ -54,10 +57,9 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
             description: 'Please enter your full name.',
             variant: 'destructive',
           });
-          setLoading(false);
           return;
         }
-        
+
         const { error } = await signUp(email, password, fullName);
         if (error) {
           if (error.message.includes('already registered')) {
@@ -82,6 +84,10 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
       }
     } finally {
       setLoading(false);
+    }
+
+    if (shouldNavigate) {
+      onSuccess?.();
     }
   };
 
