@@ -81,15 +81,24 @@ export const useAuth = () => {
   }, []);
 
   const checkOrgMembership = async (userId: string) => {
+    // Don't block UI - set loading false first, then check membership in background
+    setLoading(false);
+    
     try {
-      const { data, error } = await supabase
+      // Add timeout protection - 10 seconds max for role check
+      const rolePromise = supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .maybeSingle();
+      
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Role check timeout')), 10000)
+      );
+
+      const { data, error } = await Promise.race([rolePromise, timeoutPromise]);
 
       if (error) {
-        // Check if it's an AbortError - treat as transient
         if (isAbortError(error)) {
           console.warn('[auth] AbortError checking membership, continuing without role');
         } else {
@@ -105,13 +114,12 @@ export const useAuth = () => {
       if (isAbortError(error)) {
         console.warn('[auth] AbortError exception in membership check, continuing');
       } else {
-        console.warn('[auth] Exception checking org membership:', error);
+        console.warn('[auth] Exception/timeout checking org membership:', error);
       }
       setIsOrgMember(false);
       setRole(null);
-    } finally {
-      setLoading(false);
     }
+    // Note: loading is already false, no finally needed
   };
 
   const withTimeout = async <T,>(promise: Promise<T>, timeoutMs = 30000): Promise<T> => {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,32 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Safety timeout - force clear loading after 35 seconds
+  useEffect(() => {
+    if (loading) {
+      timeoutRef.current = setTimeout(() => {
+        console.warn('[LoginForm] Safety timeout triggered - clearing loading state');
+        setLoading(false);
+        toast({
+          title: 'Request Timeout',
+          description: 'Login is taking too long. Please check your connection and try again.',
+          variant: 'destructive',
+        });
+      }, 35000);
+    } else {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    }
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [loading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +55,10 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
+        
+        // Clear loading IMMEDIATELY after auth call returns
+        setLoading(false);
+        
         if (error) {
           const message = typeof error?.message === 'string' ? error.message : String(error);
 
@@ -54,6 +84,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
         }
       } else {
         if (!fullName.trim()) {
+          setLoading(false);
           toast({
             title: 'Missing Information',
             description: 'Please enter your full name.',
@@ -63,6 +94,10 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
         }
 
         const { error } = await signUp(email, password, fullName);
+        
+        // Clear loading IMMEDIATELY after auth call returns
+        setLoading(false);
+        
         if (error) {
           const message = typeof error?.message === 'string' ? error.message : String(error);
 
@@ -87,13 +122,12 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
         }
       }
     } catch (err: any) {
+      setLoading(false);
       toast({
         title: 'Something went wrong',
         description: err?.message ? String(err.message) : 'Please try again.',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
 
     if (shouldNavigate) {
