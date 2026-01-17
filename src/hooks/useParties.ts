@@ -2,6 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/runtimeClient';
 import { toast } from '@/hooks/use-toast';
 
+// Timeout wrapper to prevent infinite loading
+const withTimeout = <T,>(promiseLike: PromiseLike<T>, timeoutMs = 15000): Promise<T> => {
+  const promise = Promise.resolve(promiseLike);
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('Request timed out. Please check your connection and try again.')), timeoutMs)
+    ),
+  ]);
+};
+
 export interface Party {
   id: string;
   name: string;
@@ -50,13 +61,21 @@ export const useCreateParty = () => {
 
   return useMutation({
     mutationFn: async (partyData: CreatePartyData) => {
-      const { data, error } = await supabase
-        .from('parties')
-        .insert([partyData])
-        .select()
-        .single();
+      const { data, error } = await withTimeout(
+        supabase
+          .from('parties')
+          .insert([partyData])
+          .select()
+          .single()
+      );
 
       if (error) {
+        console.error('Create party error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
         throw error;
       }
 
@@ -69,7 +88,8 @@ export const useCreateParty = () => {
         description: 'New party has been saved successfully',
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
+      console.error('Create party mutation error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to add party',
@@ -84,14 +104,22 @@ export const useUpdateParty = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...partyData }: CreatePartyData & { id: string }) => {
-      const { data, error } = await supabase
-        .from('parties')
-        .update(partyData)
-        .eq('id', id)
-        .select()
-        .single();
+      const { data, error } = await withTimeout(
+        supabase
+          .from('parties')
+          .update(partyData)
+          .eq('id', id)
+          .select()
+          .single()
+      );
 
       if (error) {
+        console.error('Update party error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
         throw error;
       }
 
@@ -104,7 +132,8 @@ export const useUpdateParty = () => {
         description: 'Party information has been updated',
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
+      console.error('Update party mutation error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to update party',
@@ -119,12 +148,20 @@ export const useDeleteParty = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('parties')
-        .delete()
-        .eq('id', id);
+      const { error } = await withTimeout(
+        supabase
+          .from('parties')
+          .delete()
+          .eq('id', id)
+      );
 
       if (error) {
+        console.error('Delete party error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
         throw error;
       }
     },
@@ -135,7 +172,8 @@ export const useDeleteParty = () => {
         description: 'Party has been removed',
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
+      console.error('Delete party mutation error:', error);
       toast({
         title: 'Error',
         description: error.message || 'Failed to delete party',
