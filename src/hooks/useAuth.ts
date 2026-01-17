@@ -9,10 +9,20 @@ export const useAuth = () => {
   const [isOrgMember, setIsOrgMember] = useState(false);
   const [role, setRole] = useState<'admin' | 'staff' | null>(null);
 
+  // Helper to check if error is a recoverable AbortError
+  const isAbortError = (err: unknown): boolean => {
+    if (!err) return false;
+    const error = err as { name?: string; message?: string };
+    return error.name === 'AbortError' || 
+           (typeof error.message === 'string' && error.message.includes('signal is aborted'));
+  };
+
   useEffect(() => {
     let isMounted = true;
+    let retryCount = 0;
+    const MAX_RETRIES = 2;
 
-    // Get initial session
+    // Get initial session with retry logic for AbortError
     const initializeAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -27,8 +37,20 @@ export const useAuth = () => {
           setLoading(false);
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
-        if (isMounted) setLoading(false);
+        if (!isMounted) return;
+        
+        // AbortError is recoverable - retry a couple times
+        if (isAbortError(error) && retryCount < MAX_RETRIES) {
+          retryCount++;
+          console.warn(`[auth] AbortError on init, retry ${retryCount}/${MAX_RETRIES} in 1s...`);
+          setTimeout(() => {
+            if (isMounted) initializeAuth();
+          }, 1000);
+          return;
+        }
+        
+        console.warn('[auth] Error initializing auth (non-fatal):', error);
+        setLoading(false);
       }
     };
 
@@ -67,7 +89,12 @@ export const useAuth = () => {
         .maybeSingle();
 
       if (error) {
-        console.error('Error checking org membership:', error);
+        // Check if it's an AbortError - treat as transient
+        if (isAbortError(error)) {
+          console.warn('[auth] AbortError checking membership, continuing without role');
+        } else {
+          console.warn('[auth] Error checking org membership:', error);
+        }
         setIsOrgMember(false);
         setRole(null);
       } else {
@@ -75,7 +102,11 @@ export const useAuth = () => {
         setRole(data?.role as 'admin' | 'staff' | null);
       }
     } catch (error) {
-      console.error('Error checking org membership:', error);
+      if (isAbortError(error)) {
+        console.warn('[auth] AbortError exception in membership check, continuing');
+      } else {
+        console.warn('[auth] Exception checking org membership:', error);
+      }
       setIsOrgMember(false);
       setRole(null);
     } finally {
