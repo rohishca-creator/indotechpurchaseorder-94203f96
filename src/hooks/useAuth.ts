@@ -81,9 +81,6 @@ export const useAuth = () => {
   }, []);
 
   const checkOrgMembership = async (userId: string) => {
-    // Don't block UI - set loading false first, then check membership in background
-    setLoading(false);
-    
     try {
       // Add timeout protection - 10 seconds max for role check
       const rolePromise = supabase
@@ -118,8 +115,9 @@ export const useAuth = () => {
       }
       setIsOrgMember(false);
       setRole(null);
+    } finally {
+      setLoading(false); // Only set loading=false AFTER role check completes
     }
-    // Note: loading is already false, no finally needed
   };
 
   const withTimeout = async <T,>(promise: Promise<T>, timeoutMs = 30000): Promise<T> => {
