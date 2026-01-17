@@ -6,6 +6,9 @@ import { calculateInvoice, formatCurrency, formatDate } from "@/utils/invoiceCal
 import { downloadPDF } from "@/utils/pdfGenerator";
 import { toast } from "@/hooks/use-toast";
 import { useCreateOrder } from "@/hooks/useOrders";
+import { Party } from "@/hooks/useParties";
+import PartySelector from "@/components/parties/PartySelector";
+import AddPartyDialog from "@/components/parties/AddPartyDialog";
 
 const paymentTermsOptions = [
   "5 Days",
@@ -29,6 +32,8 @@ const coilsOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const InvoiceForm = () => {
   const createOrder = useCreateOrder();
+  const [selectedPartyId, setSelectedPartyId] = useState<string | undefined>();
+  const [addPartyDialogOpen, setAddPartyDialogOpen] = useState(false);
   const [formData, setFormData] = useState<InvoiceData>({
     invoiceDate: new Date(),
     deliveryDate: null,
@@ -50,6 +55,34 @@ const InvoiceForm = () => {
 
   const handleInputChange = (field: keyof InvoiceData, value: string | number | Date) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handlePartySelect = (party: Party | null) => {
+    if (party) {
+      setSelectedPartyId(party.id);
+      setFormData((prev) => ({
+        ...prev,
+        partyName: party.name,
+        partyAddress: party.address || "",
+        partyPhone: party.phone || "",
+        partyEmail: party.email || "",
+        station: party.station || prev.station,
+      }));
+    } else {
+      setSelectedPartyId(undefined);
+      // Clear party fields when deselecting
+      setFormData((prev) => ({
+        ...prev,
+        partyName: "",
+        partyAddress: "",
+        partyPhone: "",
+        partyEmail: "",
+      }));
+    }
+  };
+
+  const handlePartyCreated = (party: Party) => {
+    handlePartySelect(party);
   };
 
   const validateForm = (): boolean => {
@@ -123,6 +156,7 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
   };
 
   const handleNewQuotation = () => {
+    setSelectedPartyId(undefined);
     setFormData({
       ...formData,
       invoiceDate: new Date(),
@@ -192,6 +226,16 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
             </h2>
             
             <div className="space-y-4">
+              {/* Party Selector */}
+              <div>
+                <label className="label-text">Select Party</label>
+                <PartySelector
+                  selectedPartyId={selectedPartyId}
+                  onSelect={handlePartySelect}
+                  onAddNew={() => setAddPartyDialogOpen(true)}
+                />
+              </div>
+
               <div>
                 <label className="label-text">Party Name *</label>
                 <input
@@ -465,6 +509,20 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
             Reset
           </Button>
         </div>
+
+        {/* Add Party Dialog */}
+        <AddPartyDialog
+          open={addPartyDialogOpen}
+          onOpenChange={setAddPartyDialogOpen}
+          onSuccess={handlePartyCreated}
+          initialData={{
+            name: formData.partyName,
+            address: formData.partyAddress,
+            phone: formData.partyPhone,
+            email: formData.partyEmail,
+            station: formData.station,
+          }}
+        />
       </main>
     </div>
   );

@@ -7,6 +7,7 @@ export const useAuth = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isOrgMember, setIsOrgMember] = useState(false);
+  const [role, setRole] = useState<'admin' | 'staff' | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -45,6 +46,7 @@ export const useAuth = () => {
           await checkOrgMembership(session.user.id);
         } else {
           setIsOrgMember(false);
+          setRole(null);
           setLoading(false);
         }
       }
@@ -67,12 +69,15 @@ export const useAuth = () => {
       if (error) {
         console.error('Error checking org membership:', error);
         setIsOrgMember(false);
+        setRole(null);
       } else {
         setIsOrgMember(!!data);
+        setRole(data?.role as 'admin' | 'staff' | null);
       }
     } catch (error) {
       console.error('Error checking org membership:', error);
       setIsOrgMember(false);
+      setRole(null);
     } finally {
       setLoading(false);
     }
@@ -133,6 +138,7 @@ export const useAuth = () => {
     session,
     loading,
     isOrgMember,
+    role,
     signIn,
     signUp,
     signOut,
