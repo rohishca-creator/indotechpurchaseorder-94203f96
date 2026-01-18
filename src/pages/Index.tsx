@@ -5,14 +5,18 @@ import {
   CheckCircle, 
   Users, 
   IndianRupee, 
-  Package 
+  Package,
+  LogOut
 } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useAuth } from '@/hooks/useAuth';
 import StatCard from '@/components/dashboard/StatCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const { data: stats, isLoading } = useDashboardStats();
+  const { signOut } = useAuth();
 
   const formatCurrency = (value: number) => {
     if (value >= 10000000) {
@@ -54,9 +58,19 @@ const Index = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Overview of your purchase orders</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Overview of your purchase orders</p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => signOut()}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <LogOut className="w-5 h-5" />
+        </Button>
       </div>
 
       {/* 2x2 Stats Grid */}
