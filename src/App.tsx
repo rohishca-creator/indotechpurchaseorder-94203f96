@@ -12,6 +12,7 @@ import Orders from "./pages/Orders";
 import Dispatch from "./pages/Dispatch";
 import OrderDetail from "./pages/OrderDetail";
 import Parties from "./pages/Parties";
+import NewOrder from "./pages/NewOrder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,16 @@ const App = () => (
                 <ProtectedRoute>
                   <AppLayout>
                     <Index />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/new-order"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <NewOrder />
                   </AppLayout>
                 </ProtectedRoute>
               }
