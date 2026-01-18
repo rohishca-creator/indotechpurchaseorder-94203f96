@@ -128,22 +128,23 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Lighter headings */
+  /* Dark bold headings */
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
+    font-weight: 700;
+    color: hsl(var(--foreground));
   }
 
-  /* Override bold to semibold for softer look */
+  /* Keep bold dark and strong */
   .font-bold {
-    font-weight: 600 !important;
+    font-weight: 700 !important;
   }
 
   .font-semibold {
-    font-weight: 500 !important;
+    font-weight: 600 !important;
   }
 
   .font-medium {
-    font-weight: 450 !important;
+    font-weight: 500 !important;
   }
 }
 
