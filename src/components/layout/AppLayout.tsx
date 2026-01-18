@@ -2,18 +2,28 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { FilePlus, List, Truck, LogOut, User, Users } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  FileText, 
+  PlusCircle, 
+  Users, 
+  Truck, 
+  LogOut, 
+  User 
+} from 'lucide-react';
 import logo from '@/assets/logo.png';
+import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
-const navItems = [
-  { path: '/', label: 'New Order', icon: FilePlus },
-  { path: '/orders', label: 'Orders', icon: List },
-  { path: '/dispatch', label: 'Dispatch', icon: Truck },
+const bottomNavItems = [
+  { path: '/', label: 'Home', icon: LayoutDashboard },
+  { path: '/orders', label: 'Orders', icon: FileText },
+  { path: '/new-order', label: 'New', icon: PlusCircle, isCenter: true },
   { path: '/parties', label: 'Parties', icon: Users },
+  { path: '/dispatch', label: 'Dispatch', icon: Truck },
 ];
 
 const AppLayout = ({ children }: AppLayoutProps) => {
@@ -25,7 +35,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="invoice-header text-primary-foreground py-3 px-4 sticky top-0 z-50">
         <div className="container max-w-6xl mx-auto">
@@ -51,28 +61,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
               </Button>
             </div>
           </div>
-
-          {/* Navigation */}
-          <nav className="flex gap-1 mt-3 -mb-3 overflow-x-auto">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-t-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-background text-foreground'
-                      : 'text-primary-foreground/80 hover:text-primary-foreground hover:bg-white/10'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
         </div>
       </header>
 
@@ -81,10 +69,61 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="text-center text-muted-foreground text-sm py-6 no-print">
-        <p>© {new Date().getFullYear()} Indotech Metals Pvt Ltd. All rights reserved.</p>
-      </footer>
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50">
+        <div className="container max-w-6xl mx-auto">
+          <div className="flex items-center justify-around h-16">
+            {bottomNavItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              const Icon = item.icon;
+              
+              if (item.isCenter) {
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className="flex flex-col items-center justify-center -mt-6"
+                  >
+                    <div className={cn(
+                      "w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-colors",
+                      isActive 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-primary/90 text-primary-foreground hover:bg-primary"
+                    )}>
+                      <Icon className="w-7 h-7" />
+                    </div>
+                    <span className={cn(
+                      "text-xs mt-1 font-medium",
+                      isActive ? "text-primary" : "text-muted-foreground"
+                    )}>
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="flex flex-col items-center justify-center py-2 px-3 min-w-[60px]"
+                >
+                  <Icon className={cn(
+                    "w-6 h-6 transition-colors",
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  )} />
+                  <span className={cn(
+                    "text-xs mt-1 font-medium transition-colors",
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  )}>
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
     </div>
   );
 };
