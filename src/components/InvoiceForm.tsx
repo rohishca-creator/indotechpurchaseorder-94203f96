@@ -21,6 +21,7 @@ const paymentTermsOptions = [
 const itemDescriptionOptions = [
   "Copper Wire Rod 8 mm",
   "Copper Wire Rod 12 mm",
+  "Cast bar",
 ];
 
 const quantityOptions = [
