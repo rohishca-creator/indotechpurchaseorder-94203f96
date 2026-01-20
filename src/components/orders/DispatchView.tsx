@@ -7,13 +7,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { MapPin, ChevronDown, ChevronRight, Package, Truck, CheckCircle, Loader2 } from 'lucide-react';
+import { MapPin, ChevronDown, ChevronRight, Package, Truck, CheckCircle, Loader2, Layers, Box, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
 
 const DispatchView = () => {
   const { data: ordersByStation, isLoading } = useOrdersByStation();
   const updateStatus = useUpdateOrderStatus();
   const [openStations, setOpenStations] = useState<Record<string, boolean>>({});
+  const [searchQuery, setSearchQuery] = useState('');
 
   const toggleStation = (station: string) => {
     setOpenStations((prev) => ({
@@ -50,14 +52,88 @@ const DispatchView = () => {
     );
   }
 
+  // Filter stations based on search query
+  const filteredStations = Object.entries(ordersByStation).filter(([station, orders]) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      station.toLowerCase().includes(searchLower) ||
+      orders.some(o => o.party_name.toLowerCase().includes(searchLower))
+    );
+  });
+
   return (
     <div className="space-y-4">
-      {Object.entries(ordersByStation).map(([station, orders]) => {
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <Input
+          placeholder="Search by order, party, vehicle, or LR n..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 h-12 bg-card border-border rounded-xl text-base"
+        />
+      </div>
+
+      {/* Station Cards - Horizontal Scroll */}
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        {filteredStations.map(([station, orders]) => {
+          const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
+          const totalWireRod = orders.reduce((sum, o) => sum + o.number_of_coils, 0);
+          const orderCount = orders.length;
+
+          return (
+            <div
+              key={station}
+              onClick={() => toggleStation(station)}
+              className="flex-shrink-0 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-4 cursor-pointer hover:shadow-md transition-shadow min-w-[320px]"
+            >
+              <div className="flex items-center gap-3">
+                {/* City with Icon */}
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-teal-600" />
+                  <span className="font-bold text-lg text-foreground">{station}</span>
+                </div>
+
+                {/* Wire Rod Count */}
+                <div className="bg-white rounded-xl px-4 py-2 shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-amber-500" />
+                    <div className="text-center">
+                      <p className="font-bold text-lg text-foreground">{totalWireRod}</p>
+                      <p className="text-xs text-muted-foreground">Wire Rod</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quantity */}
+                <div className="bg-white rounded-xl px-4 py-2 shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <Box className="w-4 h-4 text-blue-500" />
+                    <div className="text-center">
+                      <p className="font-bold text-lg text-foreground">{totalQty.toLocaleString('en-IN')}</p>
+                      <p className="text-xs text-muted-foreground">kg</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Count */}
+                <div className="bg-white rounded-xl px-4 py-2 shadow-sm">
+                  <div className="text-center">
+                    <p className="font-bold text-lg text-foreground">{orderCount}</p>
+                    <p className="text-xs text-muted-foreground">dispatch</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Expanded Station Details */}
+      {filteredStations.map(([station, orders]) => {
         const isOpen = openStations[station] ?? false;
-        const pendingCount = orders.filter((o) => o.status === 'pending').length;
-        const confirmedCount = orders.filter((o) => o.status === 'confirmed').length;
-        const totalQty = orders.reduce((sum, o) => sum + o.quantity, 0);
-        const totalWireRod = orders.reduce((sum, o) => sum + o.number_of_coils, 0);
+
+        if (!isOpen) return null;
 
         return (
           <Collapsible
@@ -67,42 +143,24 @@ const DispatchView = () => {
           >
             <div className="bg-card rounded-xl shadow-card overflow-hidden">
               <CollapsibleTrigger asChild>
-                <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors border-b border-border">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <MapPin className="w-5 h-5 text-primary" />
+                    <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-teal-600" />
                     </div>
                     <div className="text-left">
-                      <h3 className="font-semibold text-foreground">{station}</h3>
+                      <h3 className="font-bold text-foreground">{station}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {orders.length} order{orders.length > 1 ? 's' : ''} • {totalWireRod} Wire Rod • {totalQty.toLocaleString('en-IN')} kg
+                        {orders.length} order{orders.length > 1 ? 's' : ''}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex gap-2 text-xs">
-                      {pendingCount > 0 && (
-                        <span className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
-                          {pendingCount} pending
-                        </span>
-                      )}
-                      {confirmedCount > 0 && (
-                        <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-800">
-                          {confirmedCount} confirmed
-                        </span>
-                      )}
-                    </div>
-                    {isOpen ? (
-                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                    )}
-                  </div>
+                  <ChevronDown className="w-5 h-5 text-muted-foreground" />
                 </button>
               </CollapsibleTrigger>
 
               <CollapsibleContent>
-                <div className="border-t border-border">
+                <div>
                   {orders.map((order) => (
                     <div
                       key={order.id}
@@ -112,14 +170,16 @@ const DispatchView = () => {
                         <div>
                           <Link
                             to={`/orders/${order.id}`}
-                            className="font-medium text-foreground hover:text-primary"
+                            className="font-bold text-foreground hover:text-primary"
                           >
                             {order.party_name}
                           </Link>
                           <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
                             <span>{formatDate(order.created_at)}</span>
                             <span>•</span>
-                            <span className="font-mono">{order.quantity.toLocaleString('en-IN')} kg</span>
+                            <span className="font-semibold">{order.quantity.toLocaleString('en-IN')} kg</span>
+                            <span>•</span>
+                            <span className="font-semibold">{order.number_of_coils} Wire Rod</span>
                             <span>•</span>
                             <StatusBadge status={order.status} />
                           </div>
