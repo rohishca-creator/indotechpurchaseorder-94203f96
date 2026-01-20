@@ -183,6 +183,9 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
   };
 
   const handleSaveOrder = async () => {
+    // Prevent double-clicks while saving
+    if (createOrder.isPending) return;
+    
     if (!validateForm()) return;
     if (!formData.station.trim()) {
       toast({
@@ -192,7 +195,14 @@ ${formData.partyAddress ? `📍 ${formData.partyAddress}` : ""}${formData.broker
       });
       return;
     }
-    await createOrder.mutateAsync(formData);
+    
+    try {
+      await createOrder.mutateAsync(formData);
+      // Reset form after successful save
+      handleNewQuotation();
+    } catch (error) {
+      // Error is already handled by the mutation
+    }
   };
 
   return (
