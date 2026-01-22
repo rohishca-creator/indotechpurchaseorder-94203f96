@@ -31,19 +31,31 @@ if (rootElement) {
   `;
 }
 
-// Helper to check if error is a recoverable AbortError
-const isAbortError = (err: unknown): boolean => {
+// Helper to check if error is recoverable (AbortError or ResizeObserver)
+const isRecoverableError = (err: unknown): boolean => {
   if (!err) return false;
   const error = err as { name?: string; message?: string };
-  return error.name === 'AbortError' || 
-         (typeof error.message === 'string' && error.message.includes('signal is aborted'));
+  
+  // AbortError is recoverable
+  if (error.name === 'AbortError' || 
+      (typeof error.message === 'string' && error.message.includes('signal is aborted'))) {
+    return true;
+  }
+  
+  // ResizeObserver loop errors are benign browser warnings, not real errors
+  if (typeof error.message === 'string' && 
+      error.message.includes('ResizeObserver loop')) {
+    return true;
+  }
+  
+  return false;
 };
 
 window.addEventListener("error", (e) => {
   const err = (e as ErrorEvent).error;
-  // AbortError is recoverable - don't crash the app
-  if (isAbortError(err)) {
-    console.warn('[app] Recoverable AbortError caught:', err?.message);
+  // Recoverable errors - don't crash the app
+  if (isRecoverableError(err) || isRecoverableError({ message: (e as ErrorEvent).message })) {
+    console.warn('[app] Recoverable error caught:', err?.message || (e as ErrorEvent).message);
     e.preventDefault();
     return;
   }
@@ -52,9 +64,9 @@ window.addEventListener("error", (e) => {
 
 window.addEventListener("unhandledrejection", (e) => {
   const reason = (e as PromiseRejectionEvent).reason;
-  // AbortError is recoverable - don't crash the app
-  if (isAbortError(reason)) {
-    console.warn('[app] Recoverable AbortError (rejection) caught:', reason?.message);
+  // Recoverable errors - don't crash the app
+  if (isRecoverableError(reason)) {
+    console.warn('[app] Recoverable error (rejection) caught:', reason?.message);
     e.preventDefault();
     return;
   }
