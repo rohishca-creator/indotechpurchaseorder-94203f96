@@ -12,7 +12,9 @@ import AddPartyDialog from "@/components/parties/AddPartyDialog";
 
 const paymentTermsOptions = [
   "3-4 Days",
+  "5 Days",
   "5-7 Days",
+  "7 Days",
   "Same Day RTGS",
   "Next Day RTGS",
   "Advance Payment",
